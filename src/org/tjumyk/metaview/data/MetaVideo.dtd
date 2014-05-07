@@ -1,0 +1,27 @@
+<!ELEMENT MetaVideo ( segments, categories ) >
+<!ATTLIST MetaVideo movie_file NMTOKEN #REQUIRED >
+<!ATTLIST MetaVideo name CDATA #REQUIRED >
+<!ATTLIST MetaVideo total_frames NMTOKEN #REQUIRED >
+<!ATTLIST MetaVideo version NMTOKEN #REQUIRED >
+<!ATTLIST MetaVideo fps NMTOKEN #REQUIRED >
+<!ATTLIST MetaVideo width NMTOKEN #REQUIRED >
+<!ATTLIST MetaVideo height NMTOKEN #REQUIRED >
+
+<!ELEMENT segments ( segment+ ) >
+
+<!ELEMENT segment EMPTY >
+<!ATTLIST segment key NMTOKEN #REQUIRED >
+<!ATTLIST segment from NMTOKEN #IMPLIED >
+<!ATTLIST segment to NMTOKEN #IMPLIED >
+
+<!ELEMENT categories ( category+ ) >
+
+<!ELEMENT category ( info, group+ ) >
+<!ATTLIST category name NMTOKEN #REQUIRED >
+
+<!ELEMENT group ( info, segment+ ) >
+<!ATTLIST group key NMTOKEN #REQUIRED >
+<!ATTLIST group name CDATA #REQUIRED >
+
+<!ELEMENT info ( #PCDATA ) >
+

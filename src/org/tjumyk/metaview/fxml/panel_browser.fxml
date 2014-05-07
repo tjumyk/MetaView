@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.lang.*?>
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.media.*?>
+<?import javafx.scene.web.*?>
+
+<AnchorPane id="AnchorPane" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="590.0" prefWidth="1260.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.tjumyk.metaview.controller.BrowserController">
+  <children><SplitPane dividerPositions="0.282, 0.718" focusTraversable="true" prefHeight="400.0" prefWidth="600.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+  <items><SplitPane dividerPositions="0.6105527638190955" focusTraversable="true" layoutX="-13.0" layoutY="64.0" orientation="VERTICAL" prefHeight="200.0" prefWidth="160.0">
+  <items>
+<VBox>
+<children><Label text="%browse.category_list" /><Accordion fx:id="accordion_category_list" layoutX="50.5" layoutY="68.0" prefHeight="291.0" prefWidth="292.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" VBox.vgrow="SOMETIMES" />
+</children>
+</VBox>
+<VBox>
+<children><Label text="%browse.shot_list" />
+<ScrollPane fitToWidth="true" prefViewportHeight="276.0" prefViewportWidth="357.0" VBox.vgrow="SOMETIMES">
+<content><FlowPane fx:id="flow_shot_list" hgap="10.0" prefHeight="200.0" prefWidth="200.0" vgap="10.0" VBox.vgrow="SOMETIMES" />
+</content>
+<padding>
+<Insets bottom="10.0" left="10.0" right="10.0" top="10.0" />
+</padding>
+</ScrollPane>
+</children>
+</VBox>
+  </items>
+</SplitPane><SplitPane dividerPositions="0.8040201005025126" focusTraversable="true" layoutX="54.0" layoutY="69.0" orientation="VERTICAL" prefHeight="200.0" prefWidth="160.0">
+  <items>
+    <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="100.0" prefWidth="160.0">
+<children>
+<StackPane fx:id="stack_media_view" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+<children><MediaView fx:id="media_view" layoutX="149.0" layoutY="124.0" preserveRatio="true" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
+</children>
+</StackPane>
+</children></AnchorPane><WebView fx:id="webview_info" layoutX="14.0" layoutY="-71.0" prefHeight="200.0" prefWidth="200.0" />
+  </items>
+</SplitPane><SplitPane dividerPositions="0.182" focusTraversable="true" layoutX="-20.0" layoutY="80.0" orientation="VERTICAL" prefHeight="200.0" prefWidth="160.0">
+  <items>
+<HBox>
+<children>
+    <ScrollPane id="pane_relation" fx:id="pane_relation" fitToHeight="true" fitToWidth="true" minHeight="0.0" minWidth="0.0" pannable="true" prefHeight="100.0" prefWidth="160.0" HBox.hgrow="ALWAYS" />
+</children>
+<padding>
+<Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+</padding>
+</HBox>
+    <AnchorPane fx:id="pane_sequence" minHeight="0.0" minWidth="0.0" prefHeight="100.0" prefWidth="160.0" />
+  </items>
+</SplitPane>
+  </items>
+</SplitPane>
+  </children>
+</AnchorPane>

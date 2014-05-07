@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.lang.*?>
+<?import java.net.*?>
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<AnchorPane id="AnchorPane" fx:id="root" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="200.0" prefWidth="440.0" styleClass="root" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.tjumyk.metaview.controller.DialogLoadController">
+  <children>
+    <AnchorPane prefHeight="298.0" prefWidth="422.0" styleClass="background, dialog" AnchorPane.bottomAnchor="10.0" AnchorPane.leftAnchor="10.0" AnchorPane.rightAnchor="10.0" AnchorPane.topAnchor="10.0">
+      <children>
+        <HBox alignment="CENTER_LEFT" prefHeight="36.0" prefWidth="380.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+          <children><Label text="%dialog.loading" />
+          </children>
+          <padding>
+            <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+          </padding>
+        </HBox>
+        <AnchorPane prefHeight="240.0" prefWidth="380.0" styleClass="dialog_container" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="36.0">
+          <children>
+                <GridPane id="GridPane" layoutX="157.0" layoutY="202.0" prefHeight="42.0" prefWidth="380.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0">
+                  <children>
+<HBox alignment="CENTER_LEFT" spacing="5.0">
+<padding>
+<Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+</padding>
+</HBox><HBox alignment="CENTER_RIGHT" prefHeight="100.0" prefWidth="200.0" spacing="5.0" GridPane.columnIndex="1">
+<children><Button mnemonicParsing="false" onAction="#onCancel" text="%dialog.cancel" />
+</children>
+<padding>
+<Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+</padding></HBox>
+                  </children>
+                  <columnConstraints>
+                    <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" />
+<ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
+                  </columnConstraints>
+                  <rowConstraints>
+                    <RowConstraints minHeight="10.0" vgrow="SOMETIMES" />
+                  </rowConstraints>
+<padding>
+<Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+</padding>
+                </GridPane><ProgressBar fx:id="progress" layoutX="76.0" layoutY="27.0" prefHeight="18.0" prefWidth="289.0" progress="0.0" AnchorPane.leftAnchor="15.0" AnchorPane.rightAnchor="15.0" AnchorPane.topAnchor="15.0" />
+<VBox layoutX="15.0" layoutY="40.0" prefHeight="23.0" prefWidth="350.0" AnchorPane.bottomAnchor="40.0" AnchorPane.leftAnchor="15.0" AnchorPane.rightAnchor="15.0" AnchorPane.topAnchor="40.0">
+<children><Label fx:id="label_message" layoutX="15.271484375" layoutY="45.0" prefHeight="15.0" prefWidth="350.0" AnchorPane.leftAnchor="15.0" AnchorPane.rightAnchor="15.0" AnchorPane.topAnchor="40.0" /><TextArea fx:id="area_detail" editable="false" prefHeight="200.0" prefWidth="200.0" styleClass="error_info" visible="false" />
+</children>
+</VBox>
+          </children>
+        </AnchorPane>
+      </children>
+    </AnchorPane>
+  </children>
+  <stylesheets>
+    <URL value="@../css/theme.css" />
+  </stylesheets>
+<padding>
+<Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
+</padding>
+</AnchorPane>

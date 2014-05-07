@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.lang.*?>
+<?import java.net.*?>
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.image.*?>
+<?import javafx.scene.layout.*?>
+
+<AnchorPane fx:id="root" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="700.0" prefWidth="1200.0" styleClass="root" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.tjumyk.metaview.controller.FrameController">
+  <children>
+    <AnchorPane prefHeight="400.0" prefWidth="600.0" styleClass="background" AnchorPane.bottomAnchor="10.0" AnchorPane.leftAnchor="10.0" AnchorPane.rightAnchor="10.0" AnchorPane.topAnchor="10.0">
+      <children>
+        <AnchorPane onMouseClicked="#onDoubleClickNavBar" prefHeight="93.0" prefWidth="1180.0" styleClass="nav_bar" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+          <children>
+            <HBox onMouseDragged="#onDisableDrag" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+              <children>
+                <VBox onMouseClicked="#onWindowMinimize" styleClass="window_btn">
+                  <children>
+                    <ImageView id="image_window_btn_minus" fitHeight="32.0" fitWidth="32.0" />
+                  </children>
+                </VBox>
+                <VBox onMouseClicked="#onWindowMaxOrRestore" styleClass="window_btn">
+                  <children>
+                    <ImageView id="image_window_btn_max" fitHeight="32.0" fitWidth="32.0" />
+                  </children>
+                </VBox>
+                <VBox onMouseClicked="#onWindowClose" styleClass="window_btn, close_btn">
+                  <children>
+                    <ImageView id="image_window_btn_close" fitHeight="32.0" fitWidth="32.0" />
+                  </children>
+                </VBox>
+              </children>
+            </HBox>
+            <HBox fx:id="nav_list" alignment="TOP_CENTER" onMouseDragged="#onDisableDrag" prefHeight="70.0" prefWidth="569.0" spacing="10.0" AnchorPane.leftAnchor="300.0" AnchorPane.rightAnchor="300.0" AnchorPane.topAnchor="20.0">
+              <children>
+                <VBox fx:id="nav_browser" alignment="TOP_CENTER" onMouseClicked="#onSelectNav" prefHeight="180.0" prefWidth="120.0" style="&#10;" styleClass="nav">
+                  <children>
+                    <ImageView id="news.png" fitHeight="45.0" fitWidth="45.0">
+                      <image>
+                        <Image url="@../images/video.png" />
+                      </image>
+                    </ImageView>
+                    <Label text="%nav.browse" />
+                  </children>
+                  <padding>
+                    <Insets bottom="10.0" fx:id="x1" />
+                  </padding>
+                </VBox>
+                <VBox fx:id="nav_import" alignment="TOP_CENTER" onMouseClicked="#onSelectNav" padding="$x1" prefHeight="180.0" prefWidth="120.0" styleClass="nav">
+                  <children>
+                    <ImageView id="news.png" fitHeight="45.0" fitWidth="45.0">
+                      <image>
+                        <Image url="@../images/import.png" />
+                      </image>
+                    </ImageView>
+                    <Label text="%nav.import" />
+                  </children>
+                </VBox>
+                <VBox fx:id="nav_search" alignment="TOP_CENTER" onMouseClicked="#onSelectNav" padding="$x1" prefHeight="180.0" prefWidth="120.0" styleClass="nav">
+                  <children>
+                    <ImageView id="news.png" fitHeight="45.0" fitWidth="45.0">
+                      <image>
+                        <Image url="@../images/search.png" />
+                      </image>
+                    </ImageView>
+                    <Label text="%nav.search" />
+                  </children>
+                </VBox>
+                <VBox fx:id="nav_help" alignment="TOP_CENTER" onMouseClicked="#onSelectNav" padding="$x1" prefHeight="73.0" prefWidth="120.0" styleClass="nav">
+                  <children>
+                    <ImageView id="news.png" fitHeight="45.0" fitWidth="45.0">
+                      <image>
+                        <Image url="@../images/help.png" />
+                      </image>
+                    </ImageView>
+                    <Label text="%nav.help" />
+                  </children>
+                </VBox>
+                <VBox fx:id="nav_about" alignment="TOP_CENTER" onMouseClicked="#onSelectNav" padding="$x1" prefHeight="180.0" prefWidth="120.0" styleClass="nav">
+                  <children>
+                    <ImageView id="news.png" fitHeight="45.0" fitWidth="45.0">
+                      <image>
+                        <Image url="@../images/info.png" />
+                      </image>
+                    </ImageView>
+                    <Label text="%nav.about" />
+                  </children>
+                </VBox>
+              </children>
+            </HBox>
+<HBox alignment="BASELINE_CENTER" layoutX="30.0" layoutY="30.0" spacing="10.0" AnchorPane.leftAnchor="30.0" AnchorPane.topAnchor="22.0">
+<children><Label layoutX="29.0" layoutY="31.0" styleClass="app_title" text="%app.title" AnchorPane.leftAnchor="30.0" AnchorPane.topAnchor="30.0" /><Label styleClass="app_version" text="%app.version" />
+</children>
+</HBox>
+          </children>
+        </AnchorPane>
+        <AnchorPane fx:id="container" onMouseDragged="#onDisableDrag" prefHeight="583.0" prefWidth="1180.0" styleClass="container" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="90.0" />
+      </children>
+    </AnchorPane>
+  </children>
+  <stylesheets>
+    <URL value="@../css/theme.css" />
+  </stylesheets>
+</AnchorPane>
