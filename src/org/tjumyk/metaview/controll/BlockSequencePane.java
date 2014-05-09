@@ -7,9 +7,12 @@ import java.util.Map;
 
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
+import javafx.collections.ObservableList;
+import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.scene.Node;
 import javafx.scene.control.Tooltip;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.ColumnConstraints;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.RowConstraints;
@@ -28,6 +31,8 @@ public class BlockSequencePane extends GridPane {
 	private static final int COLUMN_BLOCKS = 25;
 	private static final int TOTAL_BLOCKS = ROW_BLOCKS * COLUMN_BLOCKS;
 	private Map<Object, List<Node>> nodeListMap = new HashMap<>();
+	private BlockClickHandler blockClickHandler = new BlockClickHandler();
+	private List<Node> blocks = new ArrayList<>();
 
 	private PlayerModel model;
 	private double framePerBlock;
@@ -42,7 +47,7 @@ public class BlockSequencePane extends GridPane {
 	private void build(PlayerModel model) {
 		this.model = model;
 		MetaVideo video = this.model.getVideo();
-		framePerBlock = video.getTotalFrames() / TOTAL_BLOCKS;
+		framePerBlock = (video.getTotalFrames() - 1) / TOTAL_BLOCKS;
 
 		for (int i = 0; i < ROW_BLOCKS; i++) {
 			RowConstraints rc = new RowConstraints();
@@ -55,7 +60,6 @@ public class BlockSequencePane extends GridPane {
 			getColumnConstraints().add(cc);
 		}
 
-		List<Node> blocks = new ArrayList<>();
 		for (int i = 0, blockCount = 0; i < ROW_BLOCKS; i++) {
 			for (int j = 0; j < COLUMN_BLOCKS; j++) {
 				StackPane rect = new StackPane();
@@ -64,6 +68,7 @@ public class BlockSequencePane extends GridPane {
 				rectWrapper.setPadding(new Insets(1.5));
 				add(rectWrapper, j, i);
 				blocks.add(rect);
+				rect.setOnMouseClicked(blockClickHandler);
 				int frameStart = (int) (blockCount * framePerBlock + 1);
 				Tooltip tip = new Tooltip("Frame:" + frameStart);
 				Tooltip.install(rect, tip);
@@ -76,8 +81,8 @@ public class BlockSequencePane extends GridPane {
 				List<Node> groupList = new ArrayList<>();
 				for (Segment seg : group.getSegments()) {
 					List<Node> list = new ArrayList<>();
-					int from = (int) (seg.getFrom() / framePerBlock);
-					int to = (int) (seg.getTo() / framePerBlock);
+					int from = (int) ((seg.getFrom() - 1) / framePerBlock);
+					int to = (int) ((seg.getTo() - 1) / framePerBlock);
 					if (to >= blocks.size())
 						to = blocks.size() - 1;
 					for (int i = from; i <= to; i++)
@@ -116,5 +121,34 @@ public class BlockSequencePane extends GridPane {
 				node.getStyleClass().remove("playing");
 			}
 		});
+	}
+	
+	private class BlockClickHandler implements EventHandler<MouseEvent>{
+		public void handle(MouseEvent event) {
+			if(event.getClickCount() == 2){
+			Node node = (Node) event.getSource();
+			ObservableList<String> styles = node.getStyleClass();
+			if (styles.contains("in-playlist")) {
+				Segment target = null;
+				for (Segment seg : model.getSegmentPlayList()) {
+					if (nodeListMap.get(seg).contains(node)) {
+						target = seg;
+						break;
+					}
+				}
+				if (target != null) {
+					model.getPlayingSegment().setValue(target);
+					int blockIndex = blocks.indexOf(node);
+					double from = blockIndex * framePerBlock + 1;
+					if (from < target.getFrom())
+						from = target.getFrom();
+					model.getSeekTime()
+							.setValue(
+									Duration.seconds(from
+											/ model.getVideo().getFps()));
+				}
+			}
+			}
+		};
 	}
 }

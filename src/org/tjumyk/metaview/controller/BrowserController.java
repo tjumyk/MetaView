@@ -108,6 +108,15 @@ public class BrowserController implements Initializable {
 	}
 
 	private void initPlayer() {
+		model.getSeekTime().addListener((b, o, n) -> {
+			if (player == null) {
+				return;
+			}
+			if (n != null) {
+				player.seek(n);
+				player.play();
+			}
+		});
 		model.getPlayingSegment().addListener(
 				(observable, oldValue, newValue) -> {
 					if (player == null) {
@@ -116,7 +125,7 @@ public class BrowserController implements Initializable {
 					if (newValue == null) {
 						player.pause();
 					} else {
-						player.seek(Duration.seconds(1.0 * newValue.getFrom()
+						player.seek(Duration.seconds(1.0 * (newValue.getFrom()-1)
 								/ video.getFps()));
 						player.play();
 					}

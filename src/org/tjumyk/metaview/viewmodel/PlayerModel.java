@@ -17,6 +17,7 @@ public class PlayerModel {
 	private Property<Object> activeNode = new SimpleObjectProperty<>();
 	private Property<Object> hoverNode = new SimpleObjectProperty<>();
 	private Property<Duration> currentTime = new SimpleObjectProperty<>();
+	private Property<Duration> seekTime = new SimpleObjectProperty<>();
 
 	public PlayerModel() {
 	}
@@ -56,5 +57,9 @@ public class PlayerModel {
 
 	public Property<Duration> getCurrentTime() {
 		return currentTime;
+	}
+
+	public Property<Duration> getSeekTime() {
+		return seekTime;
 	}
 }

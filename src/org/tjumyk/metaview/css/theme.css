@@ -204,3 +204,8 @@
 	-fx-border-color:linear-gradient(black 50%, grey 100%);
 	-fx-effect: dropshadow(three-pass-box,black,2.2,0,0,0);
 }
+#pane_block .block.in-playlist:hover {
+	-fx-border-width:1px;
+	-fx-border-color:linear-gradient(grey 50%, lightgrey 100%);
+	-fx-effect: dropshadow(three-pass-box,black,2.2,0,0,0);
+}
