@@ -54,10 +54,17 @@ public class NodeStyleUtil {
 	private static void changeStyleClass(Map<Object, Node> nodeMap,
 			Map<Object, List<Line>> lineMap, Object o, String className,
 			boolean add) {
-		if (add)
+		if (add) {
 			nodeMap.get(o).getStyleClass().add(className);
-		else
+			if (lineMap != null)
+				for (Line line : lineMap.get(o))
+					line.getStyleClass().add(className);
+		} else {
 			nodeMap.get(o).getStyleClass().remove(className);
+			if (lineMap != null)
+				for (Line line : lineMap.get(o))
+					line.getStyleClass().remove(className);
+		}
 		if (o instanceof Group) {
 			Group group = (Group) o;
 			for (Segment seg : group.getSegments()) {

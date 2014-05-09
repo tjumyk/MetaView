@@ -18,21 +18,11 @@ public class PlayerModel {
 	private Property<Object> hoverNode = new SimpleObjectProperty<>();
 	private Property<Duration> currentTime = new SimpleObjectProperty<>();
 	private Property<Duration> seekTime = new SimpleObjectProperty<>();
-
-	public PlayerModel() {
-	}
+	private ObservableList<LogicUnit> logicUnitList = FXCollections
+			.observableArrayList();
 
 	public PlayerModel(MetaVideo video) {
-		this();
 		this.video = video;
-	}
-
-	public void setVideo(MetaVideo video) {
-		this.video = video;
-		segmentPlayList.clear();
-		playingSegment.setValue(null);
-		activeNode.setValue(null);
-		hoverNode.setValue(null);
 	}
 
 	public MetaVideo getVideo() {
@@ -61,5 +51,9 @@ public class PlayerModel {
 
 	public Property<Duration> getSeekTime() {
 		return seekTime;
+	}
+
+	public ObservableList<LogicUnit> getLogicUnitList() {
+		return logicUnitList;
 	}
 }

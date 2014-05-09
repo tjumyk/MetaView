@@ -9,7 +9,6 @@ import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
 import javafx.event.EventHandler;
-import javafx.geometry.Insets;
 import javafx.scene.Node;
 import javafx.scene.control.Tooltip;
 import javafx.scene.input.MouseEvent;
@@ -65,7 +64,7 @@ public class BlockSequencePane extends GridPane {
 				StackPane rect = new StackPane();
 				rect.getStyleClass().add("block");
 				StackPane rectWrapper = new StackPane(rect);
-				rectWrapper.setPadding(new Insets(1.5));
+				rectWrapper.getStyleClass().add("block-wrapper");
 				add(rectWrapper, j, i);
 				blocks.add(rect);
 				rect.setOnMouseClicked(blockClickHandler);

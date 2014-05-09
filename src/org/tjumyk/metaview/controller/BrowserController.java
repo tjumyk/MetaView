@@ -88,7 +88,7 @@ public class BrowserController implements Initializable {
 	private NodeMouseEnterListener nodeMouseEnterListener = new NodeMouseEnterListener();
 	private NodeMouseExitListener nodeMouseExitListener = new NodeMouseExitListener();
 
-	private PlayerModel model = new PlayerModel();
+	private PlayerModel model;
 	private Map<Object, Node> nodeMap = new HashMap<>();
 	private Group showSegmentsGroup;
 
@@ -101,7 +101,7 @@ public class BrowserController implements Initializable {
 	@Override
 	public void initialize(URL location, ResourceBundle resources) {
 		instance = this;
-		initPlayer();
+
 		initUI();
 		parseParam();
 		startLoad();
@@ -125,8 +125,8 @@ public class BrowserController implements Initializable {
 					if (newValue == null) {
 						player.pause();
 					} else {
-						player.seek(Duration.seconds(1.0 * (newValue.getFrom()-1)
-								/ video.getFps()));
+						player.seek(Duration.seconds(1.0
+								* (newValue.getFrom() - 1) / video.getFps()));
 						player.play();
 					}
 				});
@@ -231,6 +231,7 @@ public class BrowserController implements Initializable {
 	}
 
 	private void loadVideoUI() {
+		model = new PlayerModel(video);
 		accordion_category_list.getPanes().clear();
 		flow_shot_list.getChildren().clear();
 		nodeMap.clear();
@@ -247,7 +248,9 @@ public class BrowserController implements Initializable {
 			img.setPreserveRatio(true);
 			Label label = new Label("Segment " + seg.getIndex());
 			label.setWrapText(false);
-			box.getChildren().addAll(img, label);
+			StackPane wrapper = new StackPane(img);
+
+			box.getChildren().addAll(wrapper, label);
 			box.setUserData(seg);
 			box.setOnMouseClicked(segmentSelectListener);
 			box.setOnMouseEntered(nodeMouseEnterListener);
@@ -269,7 +272,9 @@ public class BrowserController implements Initializable {
 				Label label = new Label(group.getName());
 				label.setWrapText(true);
 				label.setPrefSize(FRMAE_TITLE_WIDTH, FRMAE_TITLE_HEIGHT);
-				box.getChildren().addAll(img, label);
+				StackPane wrapper = new StackPane(img);
+				
+				box.getChildren().addAll(wrapper, label);
 				box.setUserData(group);
 				box.setOnMouseClicked(groupSelectListener);
 				box.setOnMouseEntered(nodeMouseEnterListener);
@@ -303,8 +308,8 @@ public class BrowserController implements Initializable {
 		} catch (MalformedURLException e) {
 			e.printStackTrace();
 		}
+		initPlayer();
 
-		model.setVideo(video);
 		NodeStyleUtil.bindStyle(model, nodeMap);
 		model.getActiveNode().addListener(
 				(b, o, n) -> {
