@@ -6,10 +6,12 @@ import java.util.List;
 import java.util.Map;
 
 import javafx.beans.value.ChangeListener;
+import javafx.event.EventHandler;
 import javafx.geometry.Point2D;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.control.Tooltip;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.input.ScrollEvent;
 import javafx.scene.shape.Circle;
 import javafx.scene.shape.Line;
@@ -19,24 +21,35 @@ import org.tjumyk.metaview.model.Category;
 import org.tjumyk.metaview.model.Group;
 import org.tjumyk.metaview.model.MetaVideo;
 import org.tjumyk.metaview.model.Segment;
+import org.tjumyk.metaview.util.NodeStyleUtil;
+import org.tjumyk.metaview.viewmodel.PlayerModel;
 
 public class MetaRelationPane extends javafx.scene.Group {
-	private MetaVideo video;
+
+	private PlayerModel model;
 	private Map<Segment, Node> segmentNodes = new HashMap<>();
 	private Map<Group, Node> groupNodes = new HashMap<>();
+	private Map<Object, Node> nodeMap = new HashMap<>();
+	private Map<Object, List<Line>> lineMap = new HashMap<>();
 
 	private static final double NODE_SIZE = 12;
 	private static final double CATEGORY_NODE_GAP = 3;
 
+	private SegmentClickHandler segmentClickHandler = new SegmentClickHandler();
+	private GroupClickHandler groupClickHandler = new GroupClickHandler();
+	private NodeMouseEnterListener nodeMouseEnterListener = new NodeMouseEnterListener();
+	private NodeMouseExitListener nodeMouseExitListener = new NodeMouseExitListener();
+
 	public MetaRelationPane() {
 	}
 
-	public MetaRelationPane(MetaVideo video) {
-		this.video = video;
-		build();
+	public MetaRelationPane(PlayerModel model) {
+		build(model);
 	}
 
-	private void build() {
+	private void build(PlayerModel model) {
+		this.model = model;
+		MetaVideo video = model.getVideo();
 		List<Category> cats = new ArrayList<>();
 		for (Category cat : video.getCategories()) {
 			cats.add(cat);
@@ -64,10 +77,15 @@ public class MetaRelationPane extends javafx.scene.Group {
 		}
 
 		javafx.scene.Group root = new javafx.scene.Group();
-		
+
 		for (Segment seg : video.getSegments()) {
 			Rectangle rect = new Rectangle(NODE_SIZE * 0.8, NODE_SIZE * 0.8);
 			segmentNodes.put(seg, rect);
+			nodeMap.put(seg, rect);
+			rect.setUserData(seg);
+			rect.setOnMouseClicked(segmentClickHandler);
+			rect.setOnMouseEntered(nodeMouseEnterListener);
+			rect.setOnMouseExited(nodeMouseExitListener);
 			Tooltip tip = new Tooltip("Key:" + seg.getKey() + " From:"
 					+ seg.getFrom() + " To:" + seg.getTo());
 			Tooltip.install(rect, tip);
@@ -78,6 +96,11 @@ public class MetaRelationPane extends javafx.scene.Group {
 				Circle circle = new Circle(NODE_SIZE / 2.0 * 0.8);
 				circle.getStyleClass().add("group");
 				groupNodes.put(group, circle);
+				nodeMap.put(group, circle);
+				circle.setUserData(group);
+				circle.setOnMouseClicked(groupClickHandler);
+				circle.setOnMouseEntered(nodeMouseEnterListener);
+				circle.setOnMouseExited(nodeMouseExitListener);
 				Tooltip tip = new Tooltip(group.getName());
 				Tooltip.install(circle, tip);
 			}
@@ -118,10 +141,25 @@ public class MetaRelationPane extends javafx.scene.Group {
 					line.setStartY(groupPos.getY());
 					line.setEndX(segPos.getX() + NODE_SIZE / 2.0);
 					line.setEndY(segPos.getY() + NODE_SIZE / 2.0);
-					root.getChildren().add(0,line);
+					root.getChildren().add(0, line);
+					
+					List<Line> segList = lineMap.get(seg);
+					if(segList == null){
+						segList = new ArrayList<>();
+						lineMap.put(seg, segList);
+					}
+					segList.add(line);
+					List<Line> groupList = lineMap.get(group);
+					if(groupList == null){
+						groupList = new ArrayList<>();
+						lineMap.put(group, groupList);
+					}
+					groupList.add(line);
 				}
 			}
 		}
+
+		NodeStyleUtil.bindStyle(model, nodeMap,lineMap);
 
 		getChildren().add(root);
 
@@ -163,4 +201,53 @@ public class MetaRelationPane extends javafx.scene.Group {
 		}
 	}
 
+	private class SegmentClickHandler implements EventHandler<MouseEvent> {
+		@Override
+		public void handle(MouseEvent event) {
+			Rectangle rect = (Rectangle) event.getSource();
+			Segment seg = (Segment) rect.getUserData();
+			model.getActiveNode().setValue(seg);
+			if (event.getClickCount() == 2) {
+				model.getSegmentPlayList().clear();
+				model.getPlayingSegment().setValue(null);
+				model.getSegmentPlayList().add(seg);
+				model.getPlayingSegment().setValue(seg);
+			}
+		}
+	}
+
+	private class GroupClickHandler implements EventHandler<MouseEvent> {
+		@Override
+		public void handle(MouseEvent event) {
+			Circle circle = (Circle) event.getSource();
+			Group group = (Group) circle.getUserData();
+			model.getActiveNode().setValue(group);
+			if (event.getClickCount() == 2) {
+				model.getSegmentPlayList().clear();
+				model.getPlayingSegment().setValue(null);
+				List<Segment> segList = group.getSegments();
+				if (segList.size() > 0) {
+					model.getSegmentPlayList().addAll(segList);
+					model.getPlayingSegment().setValue(segList.get(0));
+				}
+			}
+		}
+	}
+
+	private class NodeMouseEnterListener implements EventHandler<MouseEvent> {
+		@Override
+		public void handle(MouseEvent event) {
+			Node node = (Node) event.getSource();
+			model.getHoverNode().setValue(node.getUserData());
+		}
+	}
+
+	private class NodeMouseExitListener implements EventHandler<MouseEvent> {
+		@Override
+		public void handle(MouseEvent event) {
+			Node node = (Node) event.getSource();
+			if (model.getHoverNode().getValue() == node.getUserData())
+				model.getHoverNode().setValue(null);
+		}
+	}
 }

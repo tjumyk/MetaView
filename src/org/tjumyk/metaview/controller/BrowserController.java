@@ -14,10 +14,8 @@ import java.util.concurrent.TimeUnit;
 
 import javafx.application.Platform;
 import javafx.beans.property.Property;
-import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
-import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.concurrent.Task;
 import javafx.event.EventHandler;
@@ -25,6 +23,7 @@ import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
+import javafx.scene.Node;
 import javafx.scene.control.Accordion;
 import javafx.scene.control.Label;
 import javafx.scene.control.ScrollPane;
@@ -32,7 +31,6 @@ import javafx.scene.control.TitledPane;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
-import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.StackPane;
@@ -46,6 +44,7 @@ import javafx.stage.FileChooser.ExtensionFilter;
 import javafx.util.Duration;
 
 import org.tjumyk.metaview.Main;
+import org.tjumyk.metaview.controll.BlockSequencePane;
 import org.tjumyk.metaview.controll.MetaRelationPane;
 import org.tjumyk.metaview.media.VideoFrameCapture;
 import org.tjumyk.metaview.model.Category;
@@ -53,6 +52,8 @@ import org.tjumyk.metaview.model.Group;
 import org.tjumyk.metaview.model.MetaVideo;
 import org.tjumyk.metaview.model.MetaVideoParser;
 import org.tjumyk.metaview.model.Segment;
+import org.tjumyk.metaview.util.NodeStyleUtil;
+import org.tjumyk.metaview.viewmodel.PlayerModel;
 
 public class BrowserController implements Initializable {
 
@@ -75,10 +76,7 @@ public class BrowserController implements Initializable {
 	StackPane stack_media_view;
 
 	@FXML
-	ScrollPane pane_relation;
-	
-	@FXML
-	AnchorPane pane_sequence;
+	ScrollPane pane_relation, pane_block, pane_zoom_in;
 
 	private MetaVideo video;
 	private MediaPlayer player;
@@ -87,17 +85,19 @@ public class BrowserController implements Initializable {
 	private PlayerTimeListener playerTimeListener = new PlayerTimeListener();
 	private GroupSelectListener groupSelectListener = new GroupSelectListener();
 	private SegmentSelectListener segmentSelectListener = new SegmentSelectListener();
+	private NodeMouseEnterListener nodeMouseEnterListener = new NodeMouseEnterListener();
+	private NodeMouseExitListener nodeMouseExitListener = new NodeMouseExitListener();
 
-	private ObservableList<Segment> playList = FXCollections
-			.observableArrayList();
-	private Property<Segment> playingSegment = new SimpleObjectProperty<>();
-	private Property<Segment> activeSegment = new SimpleObjectProperty<>();
+	private PlayerModel model = new PlayerModel();
+	private Map<Object, Node> nodeMap = new HashMap<>();
+	private Group showSegmentsGroup;
 
 	private static BrowserController instance;
-	public static BrowserController getInstance(){
+
+	public static BrowserController getInstance() {
 		return instance;
 	}
-	
+
 	@Override
 	public void initialize(URL location, ResourceBundle resources) {
 		instance = this;
@@ -106,22 +106,21 @@ public class BrowserController implements Initializable {
 		parseParam();
 		startLoad();
 	}
-	
-	
 
 	private void initPlayer() {
-		playingSegment.addListener((observable, oldValue, newValue) -> {
-			if (player == null) {
-				return;
-			}
-			if (newValue == null) {
-				player.pause();
-			} else {
-				player.seek(Duration.seconds(1.0 * newValue.getFrom()
-						/ video.getFps()));
-				player.play();
-			}
-		});
+		model.getPlayingSegment().addListener(
+				(observable, oldValue, newValue) -> {
+					if (player == null) {
+						return;
+					}
+					if (newValue == null) {
+						player.pause();
+					} else {
+						player.seek(Duration.seconds(1.0 * newValue.getFrom()
+								/ video.getFps()));
+						player.play();
+					}
+				});
 	}
 
 	private void initUI() {
@@ -225,15 +224,36 @@ public class BrowserController implements Initializable {
 	private void loadVideoUI() {
 		accordion_category_list.getPanes().clear();
 		flow_shot_list.getChildren().clear();
+		nodeMap.clear();
 		if (video == null)
 			return;
 
+		for (Segment seg : video.getSegments()) {
+			VBox box = new VBox(5);
+			box.getStyleClass().add("box");
+			box.setPadding(new Insets(3));
+			box.setAlignment(Pos.CENTER);
+			ImageView img = new ImageView(frameImageMap.get(seg.getKey()));
+			img.setFitHeight(FRMAE_IMAGE_HEIGHT * 0.7);
+			img.setPreserveRatio(true);
+			Label label = new Label("Segment " + seg.getIndex());
+			label.setWrapText(false);
+			box.getChildren().addAll(img, label);
+			box.setUserData(seg);
+			box.setOnMouseClicked(segmentSelectListener);
+			box.setOnMouseEntered(nodeMouseEnterListener);
+			box.setOnMouseExited(nodeMouseExitListener);
+			nodeMap.put(seg, box);
+		}
+
 		boolean firstPane = true;
 		for (Category cat : video.getCategories()) {
-			FlowPane flow = new FlowPane(10, 10);
+			FlowPane flow = new FlowPane(2, 2);
 			flow.getStyleClass().add("category_list");
 			for (Group group : cat.getGroups()) {
 				VBox box = new VBox(5);
+				box.getStyleClass().add("box");
+				box.setPadding(new Insets(3));
 				box.setAlignment(Pos.CENTER);
 				ImageView img = new ImageView(frameImageMap.get(group.getKey()));
 				img.setPreserveRatio(true);
@@ -243,7 +263,11 @@ public class BrowserController implements Initializable {
 				box.getChildren().addAll(img, label);
 				box.setUserData(group);
 				box.setOnMouseClicked(groupSelectListener);
+				box.setOnMouseEntered(nodeMouseEnterListener);
+				box.setOnMouseExited(nodeMouseExitListener);
+				nodeMap.put(group, box);
 				flow.getChildren().add(box);
+
 			}
 			ScrollPane scroll = new ScrollPane(flow);
 			scroll.setFitToWidth(true);
@@ -251,7 +275,7 @@ public class BrowserController implements Initializable {
 			TitledPane pane = new TitledPane(cat.getName(), scroll);
 			pane.setUserData(cat);
 			accordion_category_list.getPanes().add(pane);
-			if(firstPane){
+			if (firstPane) {
 				accordion_category_list.setExpandedPane(pane);
 			}
 			firstPane = false;
@@ -260,36 +284,97 @@ public class BrowserController implements Initializable {
 		if (player != null) {
 			player.stop();
 		}
-
 		File file = new File(video.getMovieFile());
 		try {
 			Media media = new Media(file.toURI().toURL().toExternalForm());
 			player = new MediaPlayer(media);
 			player.currentTimeProperty().addListener(playerTimeListener);
+			model.getCurrentTime().bind(player.currentTimeProperty());
 			media_view.setMediaPlayer(player);
 		} catch (MalformedURLException e) {
 			e.printStackTrace();
 		}
-		
-		MetaRelationPane pane = new MetaRelationPane(video);
-		pane_relation.setContent(pane);
+
+		model.setVideo(video);
+		NodeStyleUtil.bindStyle(model, nodeMap);
+		model.getActiveNode().addListener(
+				(b, o, n) -> {
+					if (n == null)
+						return;
+					if (n instanceof Group) {
+						boolean find = false;
+						int catIndex = 0;
+						outer: for (Category cat : video.getCategories()) {
+							for (Group group : cat.getGroups()) {
+								if (n == group) {
+									find = true;
+									break outer;
+								}
+							}
+							catIndex++;
+						}
+						if (!find)
+							return;
+						accordion_category_list
+								.setExpandedPane(accordion_category_list
+										.getPanes().get(catIndex));
+						showGroupSegments((Group) n);
+					}
+				});
+
+		MetaRelationPane relPane = new MetaRelationPane(model);
+		pane_relation.setContent(relPane);
+		BlockSequencePane blockPane = new BlockSequencePane(model);
+		pane_block.setContent(blockPane);
 	}
 
 	private class PlayerTimeListener implements ChangeListener<Duration> {
 		@Override
 		public void changed(ObservableValue<? extends Duration> observable,
 				Duration oldValue, Duration newValue) {
+			Property<Segment> playingSegment = model.getPlayingSegment();
+			ObservableList<Segment> segmentPlayList = model
+					.getSegmentPlayList();
+
 			if (playingSegment.getValue() == null)
 				return;
-			
+
 			if (newValue.toSeconds() >= 1.0 * playingSegment.getValue().getTo()
 					/ video.getFps()) {
-				int index = playList.indexOf(playingSegment.getValue());
-				if (index >= 0 && index < playList.size() - 1)
-					playingSegment.setValue(playList.get(index + 1));
+				int index = segmentPlayList.indexOf(playingSegment.getValue());
+				if (index >= 0 && index < segmentPlayList.size() - 1)
+					playingSegment.setValue(segmentPlayList.get(index + 1));
 				else
 					playingSegment.setValue(null);
 			}
+		}
+	}
+
+	private void showGroupSegments(Group group) {
+		if (group == showSegmentsGroup)
+			return;
+		showSegmentsGroup = group;
+		webview_info.getEngine().loadContent(group.getInfo());
+		flow_shot_list.getChildren().clear();
+		for (Segment seg : group.getSegments()) {
+			flow_shot_list.getChildren().add(nodeMap.get(seg));
+		}
+	}
+
+	private class NodeMouseEnterListener implements EventHandler<MouseEvent> {
+		@Override
+		public void handle(MouseEvent event) {
+			Node node = (Node) event.getSource();
+			model.getHoverNode().setValue(node.getUserData());
+		}
+	}
+
+	private class NodeMouseExitListener implements EventHandler<MouseEvent> {
+		@Override
+		public void handle(MouseEvent event) {
+			Node node = (Node) event.getSource();
+			if (model.getHoverNode().getValue() == node.getUserData())
+				model.getHoverNode().setValue(null);
 		}
 	}
 
@@ -298,24 +383,18 @@ public class BrowserController implements Initializable {
 		public void handle(MouseEvent event) {
 			Pane source = (Pane) event.getSource();
 			Group group = (Group) source.getUserData();
-
-			webview_info.getEngine().loadContent(group.getInfo());
-
-			flow_shot_list.getChildren().clear();
-			for (Segment seg : group.getSegments()) {
-				VBox box = new VBox(5);
-				box.setAlignment(Pos.CENTER);
-				ImageView img = new ImageView(frameImageMap.get(seg.getKey()));
-				img.setFitHeight(FRMAE_IMAGE_HEIGHT*0.7);
-				img.setPreserveRatio(true);
-				Label label = new Label("Segment " + seg.getIndex());
-				label.setWrapText(false);
-				//label.setPrefSize(FRMAE_TITLE_WIDTH, FRMAE_TITLE_HEIGHT);
-				box.getChildren().addAll(img, label);
-				box.setUserData(seg);
-				box.setOnMouseClicked(segmentSelectListener);
-				flow_shot_list.getChildren().add(box);
+			model.getActiveNode().setValue(group);
+			if (event.getClickCount() == 2) {
+				model.getSegmentPlayList().clear();
+				model.getPlayingSegment().setValue(null);
+				List<Segment> segList = group.getSegments();
+				if (segList.size() > 0) {
+					model.getSegmentPlayList().addAll(segList);
+					model.getPlayingSegment().setValue(segList.get(0));
+				}
 			}
+
+			showGroupSegments(group);
 		}
 	}
 
@@ -325,10 +404,14 @@ public class BrowserController implements Initializable {
 			Pane source = (Pane) event.getSource();
 			Segment seg = (Segment) source.getUserData();
 			int count = event.getClickCount();
-			if (count == 1)
-				activeSegment.setValue(seg);
-			else if (count == 2)
-				playingSegment.setValue(seg);
+
+			model.getActiveNode().setValue(seg);
+			if (count == 2) {
+				model.getSegmentPlayList().clear();
+				model.getPlayingSegment().setValue(null);
+				model.getSegmentPlayList().add(seg);
+				model.getPlayingSegment().setValue(seg);
+			}
 		}
 	}
 
@@ -383,7 +466,8 @@ public class BrowserController implements Initializable {
 			Segment seg;
 			ExecutorService pool;
 
-			public SubTaskRunnable(double second, Segment seg, ExecutorService pool) {
+			public SubTaskRunnable(double second, Segment seg,
+					ExecutorService pool) {
 				super();
 				this.second = second;
 				this.seg = seg;
