@@ -9,6 +9,7 @@ import javafx.event.EventHandler;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.image.Image;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.stage.Modality;
@@ -19,15 +20,28 @@ import javafx.stage.WindowEvent;
 import org.tjumyk.metaview.controller.DialogControllerBase;
 import org.tjumyk.metaview.util.DragUtil;
 
-
 public class Main extends Application {
 	private static Stage stage;
 	private static Parameters param;
 
 	public static final int STAGE_WIDTH = 1280, STAGE_HEIGHT = 700;
-	private static final String RESOURCE_BUNDLE_BASE_NAME = "metaview";
-	public static final ResourceBundle RESOURCE_BUNDLE = ResourceBundle
-			.getBundle(RESOURCE_BUNDLE_BASE_NAME);
+	private static final ResourceBundle RESOURCE_BUNDLE = ResourceBundle
+			.getBundle("metaview");
+
+	public static ResourceBundle getResources() {
+		return RESOURCE_BUNDLE;
+	}
+
+	public static Image getImage(String file, double width, double height) {
+		return new Image(Main.class.getResourceAsStream("images/" + file),
+				width, height, true, true);
+	}
+
+	public static String getString(String key) {
+		if (RESOURCE_BUNDLE.containsKey(key))
+			return RESOURCE_BUNDLE.getString(key);
+		return "%" + key;
+	}
 
 	public static Stage getStage() {
 		return stage;

@@ -84,7 +84,7 @@ public class FrameController implements Initializable {
 		if (panel == null) {
 			panel = FXMLLoader.load(
 					Main.class.getResource("fxml/" + fxmlID + ".fxml"),
-					Main.RESOURCE_BUNDLE);
+					Main.getResources());
 			AnchorPane.setTopAnchor(panel, 0.0);
 			AnchorPane.setBottomAnchor(panel, 0.0);
 			AnchorPane.setLeftAnchor(panel, 0.0);

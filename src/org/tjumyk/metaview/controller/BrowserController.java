@@ -12,6 +12,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
+import javafx.animation.FadeTransition;
 import javafx.application.Platform;
 import javafx.beans.property.Property;
 import javafx.beans.value.ChangeListener;
@@ -23,20 +24,28 @@ import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
+import javafx.geometry.Side;
 import javafx.scene.Node;
 import javafx.scene.control.Accordion;
+import javafx.scene.control.ContextMenu;
 import javafx.scene.control.Label;
+import javafx.scene.control.MenuItem;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TitledPane;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyEvent;
+import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.media.Media;
 import javafx.scene.media.MediaPlayer;
+import javafx.scene.media.MediaPlayer.Status;
 import javafx.scene.media.MediaView;
 import javafx.scene.web.WebView;
 import javafx.stage.FileChooser;
@@ -53,12 +62,17 @@ import org.tjumyk.metaview.model.MetaVideo;
 import org.tjumyk.metaview.model.MetaVideoParser;
 import org.tjumyk.metaview.model.Segment;
 import org.tjumyk.metaview.util.NodeStyleUtil;
+import org.tjumyk.metaview.viewmodel.LogicAction;
+import org.tjumyk.metaview.viewmodel.LogicUnit;
 import org.tjumyk.metaview.viewmodel.PlayerModel;
 
 public class BrowserController implements Initializable {
 
 	private static final int FRMAE_IMAGE_HEIGHT = 80;
 	private static final int FRMAE_TITLE_WIDTH = 100, FRMAE_TITLE_HEIGHT = 36;
+
+	@FXML
+	AnchorPane root;
 
 	@FXML
 	Accordion accordion_category_list;
@@ -78,8 +92,15 @@ public class BrowserController implements Initializable {
 	@FXML
 	ScrollPane pane_relation, pane_block, pane_zoom_in;
 
+	@FXML
+	VBox box_controls;
+
+	@FXML
+	ImageView img_play, img_pause, img_replay;
+
 	private MetaVideo video;
 	private MediaPlayer player;
+	private ContextMenu metaBoxContextMenu;
 	private Map<Integer, Image> frameImageMap = new HashMap<>();
 
 	private PlayerTimeListener playerTimeListener = new PlayerTimeListener();
@@ -91,6 +112,10 @@ public class BrowserController implements Initializable {
 	private PlayerModel model;
 	private Map<Object, Node> nodeMap = new HashMap<>();
 	private Group showSegmentsGroup;
+	/**
+	 * 用于操作视频的控件组的淡入/淡出动画
+	 */
+	private FadeTransition controlTransition;
 
 	private static BrowserController instance;
 
@@ -101,10 +126,47 @@ public class BrowserController implements Initializable {
 	@Override
 	public void initialize(URL location, ResourceBundle resources) {
 		instance = this;
-
+		initKeyBinding();
 		initUI();
 		parseParam();
 		startLoad();
+	}
+
+	private void initKeyBinding() {
+		root.addEventHandler(KeyEvent.KEY_PRESSED,
+				new EventHandler<KeyEvent>() {
+					@Override
+					public void handle(KeyEvent event) {
+						KeyCode keyCode = event.getCode();
+						if (keyCode == KeyCode.CONTROL) {
+							root.getStyleClass().add("logic-add");
+							event.consume();
+						} else if (keyCode == KeyCode.SHIFT) {
+							root.getStyleClass().add("logic-multiply");
+							event.consume();
+						} else if (keyCode == KeyCode.ALT) {
+							root.getStyleClass().add("logic-subtract");
+							event.consume();
+						}
+					}
+				});
+		root.addEventHandler(KeyEvent.KEY_RELEASED,
+				new EventHandler<KeyEvent>() {
+					@Override
+					public void handle(KeyEvent event) {
+						KeyCode keyCode = event.getCode();
+						if (keyCode == KeyCode.CONTROL) {
+							root.getStyleClass().remove("logic-add");
+							event.consume();
+						} else if (keyCode == KeyCode.SHIFT) {
+							root.getStyleClass().remove("logic-multiply");
+							event.consume();
+						} else if (keyCode == KeyCode.ALT) {
+							root.getStyleClass().remove("logic-subtract");
+							event.consume();
+						}
+					}
+				});
 	}
 
 	private void initPlayer() {
@@ -130,6 +192,19 @@ public class BrowserController implements Initializable {
 						player.play();
 					}
 				});
+		player.statusProperty().addListener(new ChangeListener<Status>() {
+			@Override
+			public void changed(ObservableValue<? extends Status> observable,
+					Status oldValue, Status newValue) {
+				if (newValue == Status.PLAYING) {
+					img_play.setVisible(false);
+					img_pause.setVisible(true);
+				} else {
+					img_play.setVisible(true);
+					img_pause.setVisible(false);
+				}
+			}
+		});
 	}
 
 	private void initUI() {
@@ -164,6 +239,43 @@ public class BrowserController implements Initializable {
 				toggleVideoFullScreen();
 			}
 		});
+		metaBoxContextMenu = buildContextMenu();
+	}
+
+	private ContextMenu buildContextMenu() {
+		MenuItem itemSelectPlay = new MenuItem(
+				Main.getString("metabox.select_and_play"), new ImageView(
+						Main.getImage("play.png", 24, 24)));
+		MenuItem itemAdd = new MenuItem(Main.getString("logic.add"),
+				new ImageView(Main.getImage("operation-add.png", 24, 24)));
+		MenuItem itemMultiply = new MenuItem(Main.getString("logic.multiply"),
+				new ImageView(Main.getImage("operation-multiply.png", 24, 24)));
+		MenuItem itemSubtract = new MenuItem(Main.getString("logic.subtract"),
+				new ImageView(Main.getImage("operation-subtract.png", 24, 24)));
+		ContextMenu cm = new ContextMenu(itemSelectPlay, itemAdd, itemMultiply,
+				itemSubtract);
+
+		itemSelectPlay.setOnAction(e -> {
+			Object obj = model.getActiveNode().getValue();
+			if(obj instanceof Group)
+				selectAndPlay((Group)obj);
+			else if(obj instanceof Segment)
+				selectAndPlay((Segment)obj);
+		});
+		itemAdd.setOnAction(e -> {
+			model.applyLogic(new LogicUnit(model.getActiveNode().getValue(),
+					LogicAction.ADD));
+		});
+		itemMultiply.setOnAction(e -> {
+			model.applyLogic(new LogicUnit(model.getActiveNode().getValue(),
+					LogicAction.MULTIPLY));
+		});
+		itemSubtract.setOnAction(e -> {
+			model.applyLogic(new LogicUnit(model.getActiveNode().getValue(),
+					LogicAction.SUBTRACT));
+		});
+
+		return cm;
 	}
 
 	private void toggleVideoFullScreen() {
@@ -199,8 +311,7 @@ public class BrowserController implements Initializable {
 
 	private void openNewFile() {
 		FileChooser chooser = new FileChooser();
-		chooser.setTitle(Main.RESOURCE_BUNDLE
-				.getString("filechooser.choose_metavideo"));
+		chooser.setTitle(Main.getString("filechooser.choose_metavideo"));
 		chooser.getExtensionFilters().add(
 				new ExtensionFilter("MetaVideo Description File", "*.mvd"));
 		chooser.setInitialDirectory(new File(System.getProperty("user.dir")));
@@ -240,15 +351,19 @@ public class BrowserController implements Initializable {
 
 		for (Segment seg : video.getSegments()) {
 			VBox box = new VBox(5);
-			box.getStyleClass().add("box");
+			box.getStyleClass().addAll("box", "segment");
 			box.setPadding(new Insets(3));
 			box.setAlignment(Pos.CENTER);
 			ImageView img = new ImageView(frameImageMap.get(seg.getKey()));
 			img.setFitHeight(FRMAE_IMAGE_HEIGHT * 0.7);
 			img.setPreserveRatio(true);
 			Label label = new Label("Segment " + seg.getIndex());
+			label.getStyleClass().add("name");
 			label.setWrapText(false);
-			StackPane wrapper = new StackPane(img);
+			label.setContextMenu(metaBoxContextMenu);
+			StackPane operation = new StackPane();
+			operation.getStyleClass().add("operation");
+			StackPane wrapper = new StackPane(img, operation);
 
 			box.getChildren().addAll(wrapper, label);
 			box.setUserData(seg);
@@ -264,16 +379,20 @@ public class BrowserController implements Initializable {
 			flow.getStyleClass().add("category_list");
 			for (Group group : cat.getGroups()) {
 				VBox box = new VBox(5);
-				box.getStyleClass().add("box");
+				box.getStyleClass().addAll("box", "group");
 				box.setPadding(new Insets(3));
 				box.setAlignment(Pos.CENTER);
 				ImageView img = new ImageView(frameImageMap.get(group.getKey()));
 				img.setPreserveRatio(true);
 				Label label = new Label(group.getName());
+				label.getStyleClass().add("name");
 				label.setWrapText(true);
 				label.setPrefSize(FRMAE_TITLE_WIDTH, FRMAE_TITLE_HEIGHT);
-				StackPane wrapper = new StackPane(img);
-				
+				label.setContextMenu(metaBoxContextMenu);
+				StackPane operation = new StackPane();
+				operation.getStyleClass().add("operation");
+				StackPane wrapper = new StackPane(img, operation);
+
 				box.getChildren().addAll(wrapper, label);
 				box.setUserData(group);
 				box.setOnMouseClicked(groupSelectListener);
@@ -353,10 +472,15 @@ public class BrowserController implements Initializable {
 			if (playingSegment.getValue() == null)
 				return;
 
-			if (newValue.toSeconds() >= 1.0 * playingSegment.getValue().getTo()
-					/ video.getFps()) {
-				int index = segmentPlayList.indexOf(playingSegment.getValue());
-				if (index >= 0 && index < segmentPlayList.size() - 1)
+			int index = segmentPlayList.indexOf(playingSegment.getValue());
+			if (index == -1) {
+				if (segmentPlayList.size() > 0)
+					playingSegment.setValue(segmentPlayList.get(0));
+				else
+					playingSegment.setValue(null);
+			} else if (newValue.toSeconds() >= 1.0
+					* (playingSegment.getValue().getTo() - 1) / video.getFps()) {
+				if (index < segmentPlayList.size() - 1)
 					playingSegment.setValue(segmentPlayList.get(index + 1));
 				else
 					playingSegment.setValue(null);
@@ -372,6 +496,69 @@ public class BrowserController implements Initializable {
 		flow_shot_list.getChildren().clear();
 		for (Segment seg : group.getSegments()) {
 			flow_shot_list.getChildren().add(nodeMap.get(seg));
+		}
+	}
+
+	@FXML
+	private void onPlay() {
+		Segment playingSegment = model.getPlayingSegment().getValue();
+		if (playingSegment == null) {
+			if (model.getSegmentPlayList().size() <= 0)
+				return;
+			model.getPlayingSegment().setValue(
+					model.getSegmentPlayList().get(0));
+		} else
+			player.play();
+	}
+
+	@FXML
+	private void onPause() {
+		player.pause();
+	}
+
+	@FXML
+	private void onReplay() {
+		if (model.getSegmentPlayList().size() <= 0) {
+			return;
+		}
+		model.getPlayingSegment().setValue(null);
+		model.getPlayingSegment().setValue(model.getSegmentPlayList().get(0));
+	}
+
+	@FXML
+	private void onMouseEnterVideo(MouseEvent event) {
+		if (controlTransition != null)
+			controlTransition.stop();
+		controlTransition = new FadeTransition(Duration.seconds(1.0),
+				box_controls);
+		controlTransition.setToValue(1);
+		controlTransition.play();
+	}
+
+	@FXML
+	private void onMouseExitVideo(MouseEvent event) {
+		if (controlTransition != null)
+			controlTransition.stop();
+		controlTransition = new FadeTransition(Duration.seconds(1.0),
+				box_controls);
+		controlTransition.setToValue(0);
+		controlTransition.play();
+	}
+
+	private void selectAndPlay(Segment seg) {
+		model.getSegmentPlayList().clear();
+		model.getPlayingSegment().setValue(null);
+		model.getSegmentPlayList().add(seg);
+		model.getPlayingSegment().setValue(seg);
+	}
+
+	private void selectAndPlay(Group group) {
+		model.getSegmentPlayList().clear();
+		model.getPlayingSegment().setValue(null);
+		List<Segment> segList = group.getSegments();
+		if (segList.size() > 0) {
+			model.getSegmentPlayList().addAll(segList);
+			model.getPlayingSegment().setValue(segList.get(0));
 		}
 	}
 
@@ -397,19 +584,28 @@ public class BrowserController implements Initializable {
 		public void handle(MouseEvent event) {
 			Pane source = (Pane) event.getSource();
 			Group group = (Group) source.getUserData();
-			model.getActiveNode().setValue(group);
-			if (event.getClickCount() == 2) {
-				model.getSegmentPlayList().clear();
-				model.getPlayingSegment().setValue(null);
-				List<Segment> segList = group.getSegments();
-				if (segList.size() > 0) {
-					model.getSegmentPlayList().addAll(segList);
-					model.getPlayingSegment().setValue(segList.get(0));
+			int clickCount = event.getClickCount();
+
+			if (clickCount == 1) {
+				if (root.getStyleClass().contains("logic-add")) {
+					model.applyLogic(new LogicUnit(group, LogicAction.ADD));
+				} else if (root.getStyleClass().contains("logic-multiply")) {
+					model.applyLogic(new LogicUnit(group, LogicAction.MULTIPLY));
+				} else if (root.getStyleClass().contains("logic-subtract")) {
+					model.applyLogic(new LogicUnit(group, LogicAction.SUBTRACT));
+				} else
+					model.getActiveNode().setValue(group);
+
+				if (event.getButton() == MouseButton.SECONDARY) {
+					metaBoxContextMenu.show(source, Side.RIGHT, 0, 0);
 				}
+			} else if (clickCount == 2) {
+				selectAndPlay(group);
 			}
 
 			showGroupSegments(group);
 		}
+
 	}
 
 	private class SegmentSelectListener implements EventHandler<MouseEvent> {
@@ -419,14 +615,26 @@ public class BrowserController implements Initializable {
 			Segment seg = (Segment) source.getUserData();
 			int count = event.getClickCount();
 
-			model.getActiveNode().setValue(seg);
-			if (count == 2) {
-				model.getSegmentPlayList().clear();
-				model.getPlayingSegment().setValue(null);
-				model.getSegmentPlayList().add(seg);
-				model.getPlayingSegment().setValue(seg);
+			if (count == 1) {
+				if (root.getStyleClass().contains("logic-add")) {
+					model.applyLogic(new LogicUnit(seg, LogicAction.ADD));
+				} else if (root.getStyleClass().contains("logic-multiply")) {
+					model.applyLogic(new LogicUnit(seg, LogicAction.MULTIPLY));
+				} else if (root.getStyleClass().contains("logic-subtract")) {
+					model.applyLogic(new LogicUnit(seg, LogicAction.SUBTRACT));
+				} else
+					model.getActiveNode().setValue(seg);
+
+				if (event.getButton() == MouseButton.SECONDARY) {
+					metaBoxContextMenu.show(source, Side.RIGHT, 0, 0);
+				}
+			} else {
+				if (count == 2) {
+					selectAndPlay(seg);
+				}
 			}
 		}
+
 	}
 
 	private class LoadFrameImageTask extends Task<Void> {
@@ -439,12 +647,10 @@ public class BrowserController implements Initializable {
 					.getRuntime().availableProcessors());
 			int size = video.getSegments().size();
 			updateProgress(-1, size);
-			updateMessage(Main.RESOURCE_BUNDLE
-					.getString("browse.loading_ffmpeg"));
+			updateMessage(Main.getString("browse.loading_ffmpeg"));
 			VideoFrameCapture.checkLoadFFmpeg();
 			updateProgress(0, size);
-			updateMessage(Main.RESOURCE_BUNDLE
-					.getString("browse.loading_frame_images"));
+			updateMessage(Main.getString("browse.loading_frame_images"));
 			for (Segment seg : video.getSegments()) {
 				double second = 1.0 * seg.getKey() / video.getFps();
 				pool.submit(new SubTaskRunnable(second, seg, pool));

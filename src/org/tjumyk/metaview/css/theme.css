@@ -124,7 +124,7 @@
 #pane_meta_browse .box.active{
 	-fx-background-color: grey;
 }
-#pane_meta_browse .box.active .label{
+#pane_meta_browse .box.active .name.label{
 	-fx-text-fill:white;
 }
 #pane_meta_browse .box.in-playlist{
@@ -217,4 +217,35 @@
 	-fx-border-width:1px;
 	-fx-border-color:linear-gradient(grey 50%, lightgrey 100%);
 	-fx-effect: dropshadow(three-pass-box,black,2.2,0,0,0);
+}
+.operation{
+	-fx-background-repeat:no-repeat;
+	-fx-background-position:center;
+	-fx-opacity:0.75;
+}
+.segment .operation{
+	-fx-scale-x:0.5;
+	-fx-scale-y:0.5;
+}
+.logic-add .operation{
+	-fx-background-image:url('../images/operation-add.png');
+}
+.logic-multiply .operation{
+	-fx-background-image:url('../images/operation-multiply.png');
+}
+.logic-subtract .operation{
+	-fx-background-image:url('../images/operation-subtract.png');
+}
+
+/* styles for media controls */
+.media-control-btn{
+	-fx-opacity:0.75;
+}
+.media-control-btn:hover {
+	-fx-effect:dropshadow(three-pass-box,black,5,0,1,1);
+}
+.media-control-btn:pressed{
+	-fx-translate-x:1px;
+	-fx-translate-y:1px;
+	-fx-effect:dropshadow(three-pass-box,black,5,0,0,0);
 }

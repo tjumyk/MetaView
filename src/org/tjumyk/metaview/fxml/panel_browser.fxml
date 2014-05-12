@@ -3,11 +3,12 @@
 <?import java.lang.*?>
 <?import javafx.geometry.*?>
 <?import javafx.scene.control.*?>
+<?import javafx.scene.image.*?>
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.media.*?>
 <?import javafx.scene.web.*?>
 
-<AnchorPane id="AnchorPane" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="590.0" prefWidth="1260.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.tjumyk.metaview.controller.BrowserController">
+<AnchorPane id="AnchorPane" fx:id="root" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="590.0" prefWidth="1260.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.tjumyk.metaview.controller.BrowserController">
   <children><SplitPane dividerPositions="0.29, 0.71" focusTraversable="true" prefHeight="400.0" prefWidth="600.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
   <items><SplitPane fx:id="pane_meta_browse" dividerPositions="0.6292517006802721" focusTraversable="true" layoutX="-13.0" layoutY="64.0" orientation="VERTICAL" prefHeight="200.0" prefWidth="160.0">
   <items>
@@ -32,7 +33,33 @@
     <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="100.0" prefWidth="160.0">
 <children>
 <StackPane fx:id="stack_media_view" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-<children><MediaView fx:id="media_view" layoutX="149.0" layoutY="124.0" preserveRatio="true" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
+<children><MediaView fx:id="media_view" layoutX="149.0" layoutY="124.0" preserveRatio="true" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" /><VBox fx:id="box_controls" alignment="CENTER" onMouseEntered="#onMouseEnterVideo" onMouseExited="#onMouseExitVideo" opacity="0.0">
+<children>
+<HBox alignment="CENTER" prefHeight="64.0" prefWidth="200.0" spacing="50.0" StackPane.alignment="CENTER">
+<children>
+<StackPane>
+<children>
+<ImageView fx:id="img_play" onMouseClicked="#onPlay" styleClass="media-control-btn">
+<image>
+<Image url="@../images/play.png" />
+</image>
+</ImageView>
+<ImageView fx:id="img_pause" onMouseClicked="#onPause" styleClass="media-control-btn" visible="false">
+<image>
+<Image url="@../images/pause.png" />
+</image>
+</ImageView>
+</children>
+</StackPane>
+<ImageView fx:id="img_replay" onMouseClicked="#onReplay" styleClass="media-control-btn">
+<image>
+<Image url="@../images/replay.png" />
+</image>
+</ImageView>
+</children>
+</HBox>
+</children>
+</VBox>
 </children>
 </StackPane>
 </children></AnchorPane><WebView fx:id="webview_info" layoutX="14.0" layoutY="-71.0" prefHeight="200.0" prefWidth="200.0" />
