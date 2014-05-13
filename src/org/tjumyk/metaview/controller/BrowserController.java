@@ -133,40 +133,32 @@ public class BrowserController implements Initializable {
 	}
 
 	private void initKeyBinding() {
-		root.addEventHandler(KeyEvent.KEY_PRESSED,
-				new EventHandler<KeyEvent>() {
-					@Override
-					public void handle(KeyEvent event) {
-						KeyCode keyCode = event.getCode();
-						if (keyCode == KeyCode.CONTROL) {
-							root.getStyleClass().add("logic-add");
-							event.consume();
-						} else if (keyCode == KeyCode.SHIFT) {
-							root.getStyleClass().add("logic-multiply");
-							event.consume();
-						} else if (keyCode == KeyCode.ALT) {
-							root.getStyleClass().add("logic-subtract");
-							event.consume();
-						}
-					}
-				});
-		root.addEventHandler(KeyEvent.KEY_RELEASED,
-				new EventHandler<KeyEvent>() {
-					@Override
-					public void handle(KeyEvent event) {
-						KeyCode keyCode = event.getCode();
-						if (keyCode == KeyCode.CONTROL) {
-							root.getStyleClass().remove("logic-add");
-							event.consume();
-						} else if (keyCode == KeyCode.SHIFT) {
-							root.getStyleClass().remove("logic-multiply");
-							event.consume();
-						} else if (keyCode == KeyCode.ALT) {
-							root.getStyleClass().remove("logic-subtract");
-							event.consume();
-						}
-					}
-				});
+		root.addEventHandler(KeyEvent.KEY_PRESSED, event -> {
+			KeyCode keyCode = event.getCode();
+			if (keyCode == KeyCode.CONTROL) {
+				root.getStyleClass().add("logic-add");
+				event.consume();
+			} else if (keyCode == KeyCode.SHIFT) {
+				root.getStyleClass().add("logic-multiply");
+				event.consume();
+			} else if (keyCode == KeyCode.ALT) {
+				root.getStyleClass().add("logic-subtract");
+				event.consume();
+			}
+		});
+		root.addEventHandler(KeyEvent.KEY_RELEASED, event -> {
+			KeyCode keyCode = event.getCode();
+			if (keyCode == KeyCode.CONTROL) {
+				root.getStyleClass().remove("logic-add");
+				event.consume();
+			} else if (keyCode == KeyCode.SHIFT) {
+				root.getStyleClass().remove("logic-multiply");
+				event.consume();
+			} else if (keyCode == KeyCode.ALT) {
+				root.getStyleClass().remove("logic-subtract");
+				event.consume();
+			}
+		});
 	}
 
 	private void initPlayer() {
@@ -192,44 +184,33 @@ public class BrowserController implements Initializable {
 						player.play();
 					}
 				});
-		player.statusProperty().addListener(new ChangeListener<Status>() {
-			@Override
-			public void changed(ObservableValue<? extends Status> observable,
-					Status oldValue, Status newValue) {
-				if (newValue == Status.PLAYING) {
-					img_play.setVisible(false);
-					img_pause.setVisible(true);
-				} else {
-					img_play.setVisible(true);
-					img_pause.setVisible(false);
-				}
-			}
-		});
+		player.statusProperty().addListener(
+				(observable, oldValue, newValue) -> {
+					if (newValue == Status.PLAYING) {
+						img_play.setVisible(false);
+						img_pause.setVisible(true);
+					} else {
+						img_play.setVisible(true);
+						img_pause.setVisible(false);
+					}
+				});
 	}
 
 	private void initUI() {
 		accordion_category_list.expandedPaneProperty().addListener(
-				new ChangeListener<TitledPane>() {
-					@Override
-					public void changed(
-							ObservableValue<? extends TitledPane> observable,
-							TitledPane oldValue, TitledPane newValue) {
-						if (newValue == null)
-							webview_info.getEngine().loadContent("");
-						else {
-							Category cat = (Category) newValue.getUserData();
-							webview_info.getEngine().loadContent(cat.getInfo());
-						}
-
+				(observable, oldValue, newValue) -> {
+					if (newValue == null)
+						webview_info.getEngine().loadContent("");
+					else {
+						Category cat = (Category) newValue.getUserData();
+						webview_info.getEngine().loadContent(cat.getInfo());
 					}
+
 				});
-		ChangeListener<Number> stack_size_listener = new ChangeListener<Number>() {
-			@Override
-			public void changed(ObservableValue<? extends Number> observable,
-					Number oldValue, Number newValue) {
-				media_view.setFitWidth(stack_media_view.getWidth());
-				media_view.setFitHeight(stack_media_view.getHeight());
-			}
+		ChangeListener<Number> stack_size_listener = (observable, oldValue,
+				newValue) -> {
+			media_view.setFitWidth(stack_media_view.getWidth());
+			media_view.setFitHeight(stack_media_view.getHeight());
 		};
 		stack_media_view.widthProperty().addListener(stack_size_listener);
 		stack_media_view.heightProperty().addListener(stack_size_listener);
@@ -257,10 +238,10 @@ public class BrowserController implements Initializable {
 
 		itemSelectPlay.setOnAction(e -> {
 			Object obj = model.getActiveNode().getValue();
-			if(obj instanceof Group)
-				selectAndPlay((Group)obj);
-			else if(obj instanceof Segment)
-				selectAndPlay((Segment)obj);
+			if (obj instanceof Group)
+				selectAndPlay((Group) obj);
+			else if (obj instanceof Segment)
+				selectAndPlay((Segment) obj);
 		});
 		itemAdd.setOnAction(e -> {
 			model.applyLogic(new LogicUnit(model.getActiveNode().getValue(),
@@ -646,7 +627,23 @@ public class BrowserController implements Initializable {
 			ExecutorService pool = Executors.newFixedThreadPool(Runtime
 					.getRuntime().availableProcessors());
 			int size = video.getSegments().size();
+			
 			updateProgress(-1, size);
+			updateMessage(Main.getString("browse.loading_cache"));
+			int cachedCount = 0;
+			for(Segment segment : video.getSegments()){
+				int key = segment.getKey();
+				double second = 1.0 * segment.getKey() / video.getFps();
+				Image img = VideoFrameCapture.getCache(video.getMovieFile(), second, FRMAE_IMAGE_HEIGHT);
+				if(img != null){
+					frameImageMap.put(key, img);
+					Thread.sleep(20);
+					cachedCount ++;
+				}
+			}
+			if(cachedCount == size){
+				return null;
+			}
 			updateMessage(Main.getString("browse.loading_ffmpeg"));
 			VideoFrameCapture.checkLoadFFmpeg();
 			updateProgress(0, size);
@@ -697,9 +694,13 @@ public class BrowserController implements Initializable {
 			@Override
 			public void run() {
 				try {
-					Image image = VideoFrameCapture.capture(
-							video.getMovieFile(), second, FRMAE_IMAGE_HEIGHT);
-					frameImageMap.put(seg.getKey(), image);
+					int key = seg.getKey();
+					if (!frameImageMap.containsKey(key)) {
+						Image image = VideoFrameCapture.capture(
+								video.getMovieFile(), second,
+								FRMAE_IMAGE_HEIGHT);
+						frameImageMap.put(key, image);
+					}
 					updateLoadProgress();
 				} catch (InterruptedException e) {
 					// don't care

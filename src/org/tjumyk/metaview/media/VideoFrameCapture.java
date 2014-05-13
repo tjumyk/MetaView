@@ -10,20 +10,28 @@ import java.util.List;
 
 import javafx.scene.image.Image;
 
+import org.tjumyk.metaview.Main;
 import org.tjumyk.metaview.data.DataLoader;
 
 public class VideoFrameCapture {
 	private static File ffmpeg;
-	private static String TEMP_DIR = System.getProperty("java.io.tmpdir");
+
+	public static Image getCache(String video, double second, int height)
+			throws IOException, InterruptedException,
+			VideoFrameCaptureException {
+		File tmp = new File(Main.TEMP_DIR + video.hashCode() + "_" + second
+				+ "_" + height + ".jpg");
+		Image img = null;
+		if (tmp.exists())
+			img = new Image(tmp.toURI().toURL().toExternalForm());
+		return img;
+	}
 
 	public static Image capture(String video, double second, int height)
 			throws IOException, InterruptedException,
 			VideoFrameCaptureException {
-		// File tmp = File.createTempFile("screenshot", ".jpg");
-		// tmp.deleteOnExit();
-
-		File tmp = new File(TEMP_DIR + video.hashCode() + "_" + second + "_"
-				+ height + ".jpg");
+		File tmp = new File(Main.TEMP_DIR + video.hashCode() + "_" + second
+				+ "_" + height + ".jpg");
 		if (!tmp.exists()) {
 			checkLoadFFmpeg();
 			final ProcessBuilder pb = new ProcessBuilder();

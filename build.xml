@@ -1,0 +1,122 @@
+<project name="MetaView" default="default" basedir="." xmlns:fx="javafx:com.sun.javafx.tools.ant">
+
+	<property file="deploy/project.properties" />
+	<property environment="env" />
+
+	<taskdef resource="com/sun/javafx/tools/ant/antlib.xml" uri="javafx:com.sun.javafx.tools.ant">
+		<classpath>
+			<pathelement path="${env.JAVA_HOME}/lib/ant-javafx.jar" />
+		</classpath>
+	</taskdef>
+
+	<fx:application id="app" name="${application.title}" mainClass="${application.mainclass}" />
+
+	<fx:resources id="appRes">
+		<fileset dir="." includes="lib/*.jar" />
+		<fileset dir="dist" includes="${application.title}.jar" />
+	</fx:resources>
+
+	<target name="check">
+		<condition property="delbin">
+			<available file="bin" type="dir" />
+		</condition>
+		<condition property="deldist">
+			<available file="dist" type="dir" />
+		</condition>
+		<condition property="enableproguard">
+			<equals arg1="${proguard.enabled}" arg2="true" />
+		</condition>
+		<condition property="css2bin">
+			<equals arg1="${css2bin.enabled}" arg2="true" />
+		</condition>
+	</target>
+
+	<target name="clean-bin" depends="check" if="delbin">
+		<delete dir="bin" />
+	</target>
+
+	<target name="clean-dist" depends="check" if="deldist">
+		<delete dir="dist" />
+	</target>
+
+	<target name="compile" depends="clean-bin">
+		<mkdir dir="bin" />
+		<javac srcdir="src/" destdir="bin/" source="1.8" includeAntRuntime="false">
+			<classpath>
+				<fileset dir="lib">
+					<include name="**/*.jar" />
+				</fileset>
+			</classpath>
+			<compilerarg value="-XDignore.symbol.file" />
+		</javac>
+		<copy todir="bin">
+			<fileset dir="src" includes="**/*.*" excludes="**/*.java" />
+		</copy>
+	</target>
+
+	<target name="test" depends="compile">
+		<java classname="org.junit.runner.JUnitCore" fork="true">
+			<arg value="org.tjumyk.metaview.test.AllTests" />
+			<classpath>
+				<pathelement location="lib/no_copy/junit-4.10.jar" />
+				<fileset dir="lib">
+					<include name="*.jar" />
+				</fileset>
+				<pathelement path="bin" />
+			</classpath>
+		</java>
+	</target>
+
+	<target name="css-to-bin" depends="check,compile" if="css2bin">
+		<fx:csstobin outdir="bin">
+			<fileset dir="bin" includes="**/*.css" />
+		</fx:csstobin>
+		<delete>
+			<fileset dir="bin" includes="**/*.css" />
+		</delete>
+	</target>
+
+	<target name="make-jars" depends="compile,test,css-to-bin,clean-dist">
+		<mkdir dir="dist" />
+		<fx:jar destfile="dist/${application.title}.jar">
+			<fx:application refid="app" />
+			<fx:resources refid="appRes" />
+			<manifest>
+				<attribute name="Implementation-Vendor" value="${application.vendor}" />
+				<attribute name="Implementation-Title" value="${application.title}" />
+				<attribute name="Implementation-Version" value="${application.version}" />
+				<attribute name="Permissions" value="${applet.permission}" />
+			</manifest>
+			<fileset dir="bin" />
+		</fx:jar>
+
+		<copy toDir="dist/lib">
+			<fileset dir="lib" includes="*.jar" />
+		</copy>
+	</target>
+
+	<target name="sign-jars" depends="make-jars">
+		<fx:signjar destdir="dist" keyStore="deploy/${sign.keystore}" storePass="${sign.storepass}" alias="${sign.alias}" keyPass="${sign.keypass}">
+			<fileset dir="dist" includes="**/*.jar" />
+		</fx:signjar>
+	</target>
+
+	<target name="deploy" depends="sign-jars">
+		<fx:deploy width="${applet.width}" height="${applet.height}" outdir="dist" outfile="${application.title}" offlineAllowed="true" nativeBundles="image">
+			<fx:info title="${application.title}" vendor="${application.vendor}" description="${application.description}" />
+			<fx:application refid="app" />
+			<fx:resources refid="appRes" />
+		</fx:deploy>
+	</target>
+
+	<target name="run" depends="sign-jars">
+		<java classname="org.tjumyk.metaview.Main" fork="true">
+			<classpath>
+				<pathelement location="dist/lib/*.jar" />
+				<pathelement path="dist/${application.title}.jar" />
+			</classpath>
+		</java>
+	</target>
+
+	<target name="default" depends="sign-jars" />
+</project>
