@@ -135,13 +135,16 @@ public class BrowserController implements Initializable {
 		root.addEventHandler(KeyEvent.KEY_PRESSED, event -> {
 			KeyCode keyCode = event.getCode();
 			if (keyCode == KeyCode.CONTROL) {
-				root.getStyleClass().add("logic-add");
+				if (!root.getStyleClass().contains("logic-add"))
+					root.getStyleClass().add("logic-add");
 				event.consume();
 			} else if (keyCode == KeyCode.SHIFT) {
-				root.getStyleClass().add("logic-multiply");
+				if (!root.getStyleClass().contains("logic-multiply"))
+					root.getStyleClass().add("logic-multiply");
 				event.consume();
 			} else if (keyCode == KeyCode.ALT) {
-				root.getStyleClass().add("logic-subtract");
+				if (!root.getStyleClass().contains("logic-subtract"))
+					root.getStyleClass().add("logic-subtract");
 				event.consume();
 			}
 		});
@@ -220,6 +223,23 @@ public class BrowserController implements Initializable {
 			}
 		});
 		metaBoxContextMenu = buildContextMenu();
+
+		webview_info.getEngine().setUserStyleSheetLocation(
+				Main.class.getResource("css/webview.css").toExternalForm());
+
+		Platform.runLater(() -> {
+			root.getScene().getWindow().focusedProperty()
+					.addListener(new ChangeListener<Boolean>() {
+						@Override
+						public void changed(
+								ObservableValue<? extends Boolean> observable,
+								Boolean oldValue, Boolean newValue) {
+							if (newValue == false)
+								root.getStyleClass().removeAll("logic-add",
+										"logic-multiply", "logic-subtract");
+						}
+					});
+		});
 	}
 
 	private ContextMenu buildContextMenu() {
@@ -660,14 +680,15 @@ public class BrowserController implements Initializable {
 					updateProgress(count, size);
 				}
 			} else {
-				updateMessage(Main.getString("browse.loading_from_local_folder"));
+				updateMessage(Main
+						.getString("browse.loading_from_local_folder"));
 				String folder = video.getFrameImageFolder();
 				if (folder != null && folder.length() > 0) {
 					int loaded = 0;
 					for (Segment segment : video.getSegments()) {
 						int key = segment.getKey();
-						if (frameImageMap.containsKey(key)){
-							loaded ++;
+						if (frameImageMap.containsKey(key)) {
+							loaded++;
 							continue;
 						}
 						double second = 1.0 * segment.getKey() / video.getFps();
@@ -680,7 +701,7 @@ public class BrowserController implements Initializable {
 							loaded++;
 						}
 					}
-					if(loaded == size){
+					if (loaded == size) {
 						return null;
 					}
 				}

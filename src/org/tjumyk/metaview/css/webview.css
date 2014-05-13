@@ -1,0 +1,17 @@
+body{
+  background-color:black;
+  font-family: Helvetica, Arial, 'Microsoft Yahei', STXihei, sans-serif;
+  font-size:16px;
+  color:whitesmoke;
+  //text-shadow: rgba(34, 34, 34, 0.6) 1px 1px 1px;
+  -webkit-font-smoothing: antialiased;
+}
+*:first-letter{
+  font-size:30px;
+  margin-right:3px;
+  float:left; 
+}
+.photo{
+  margin: 0 10px 10px 0;
+  float:left;
+}

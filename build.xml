@@ -70,10 +70,10 @@
 
 	<target name="css-to-bin" depends="check,compile" if="css2bin">
 		<fx:csstobin outdir="bin">
-			<fileset dir="bin" includes="**/*.css" />
+			<fileset dir="bin" includes="**/theme*.css" />
 		</fx:csstobin>
 		<delete>
-			<fileset dir="bin" includes="**/*.css" />
+			<fileset dir="bin" includes="**/theme*.css" />
 		</delete>
 	</target>
 
