@@ -3,6 +3,7 @@ package org.tjumyk.metaview.model;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
+import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -27,15 +28,38 @@ public class MetaVideoParser {
 		video.setHeight(Integer.parseInt(root.getAttribute("height")));
 
 		String filePath = root.getAttribute("movie_file");
-		File movieFile = new File(filePath);
-		if (!movieFile.exists() || !movieFile.isFile()) {
-			movieFile = new File(file.getParent() + File.separatorChar
-					+ filePath);
-			if (!movieFile.exists() || !movieFile.isFile())
-				movieFile = null;
+		if (filePath.startsWith("http://") || filePath.startsWith("ftp://")
+				|| filePath.startsWith("https://")) {
+			URL url = new URL(filePath);
+			video.setMovieFile(url.toExternalForm());
+		} else {
+			File movieFile = new File(filePath);
+			if (!movieFile.exists() || !movieFile.isFile()) {
+				movieFile = new File(file.getParent() + File.separatorChar
+						+ filePath);
+				if (!movieFile.exists() || !movieFile.isFile())
+					movieFile = null;
+			}
+			if (movieFile != null)
+				video.setMovieFile(movieFile.toURI().toURL().toExternalForm());
 		}
-		if (movieFile != null)
-			video.setMovieFile(movieFile.getAbsolutePath());
+		String folderPath = root.getAttribute("frame_image_folder");
+		if (folderPath.startsWith("http://") || folderPath.startsWith("ftp://")
+				|| folderPath.startsWith("https://")) {
+			URL url = new URL(folderPath);
+			video.setFrameImageFolder(url.toExternalForm());
+		} else {
+			File imageFolder = new File(folderPath);
+			if (!imageFolder.exists() || !imageFolder.isDirectory()) {
+				imageFolder = new File(file.getParent() + File.separatorChar
+						+ folderPath);
+				if (!imageFolder.exists() || !imageFolder.isDirectory())
+					imageFolder = null;
+			}
+			if (imageFolder != null)
+				video.setFrameImageFolder(imageFolder.toURI().toURL()
+						.toExternalForm());
+		}
 
 		Element segmentsElement = XMLParser.getDirectChildElementsByName(root,
 				"segments").get(0);

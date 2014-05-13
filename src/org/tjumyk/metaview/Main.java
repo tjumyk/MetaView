@@ -25,8 +25,9 @@ public class Main extends Application {
 	private static Parameters param;
 
 	public static final int STAGE_WIDTH = 1280, STAGE_HEIGHT = 700;
-	public static String TEMP_DIR = System.getProperty("java.io.tmpdir");
-	
+	public static String TEMP_DIR = System.getProperty("java.io.tmpdir")
+			+ "metaview/";
+
 	private static final ResourceBundle RESOURCE_BUNDLE = ResourceBundle
 			.getBundle("metaview");
 

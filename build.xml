@@ -6,6 +6,7 @@
 	<taskdef resource="com/sun/javafx/tools/ant/antlib.xml" uri="javafx:com.sun.javafx.tools.ant">
 		<classpath>
 			<pathelement path="${env.JAVA_HOME}/lib/ant-javafx.jar" />
+			<pathelement path="deploy" />
 		</classpath>
 	</taskdef>
 
@@ -102,7 +103,7 @@
 	</target>
 
 	<target name="deploy" depends="sign-jars">
-		<fx:deploy width="${applet.width}" height="${applet.height}" outdir="dist" outfile="${application.title}" offlineAllowed="true" nativeBundles="image">
+		<fx:deploy verbose="true" width="${applet.width}" height="${applet.height}" outdir="dist" outfile="${application.title}" offlineAllowed="true" nativeBundles="exe">
 			<fx:info title="${application.title}" vendor="${application.vendor}" description="${application.description}" />
 			<fx:application refid="app" />
 			<fx:resources refid="appRes" />

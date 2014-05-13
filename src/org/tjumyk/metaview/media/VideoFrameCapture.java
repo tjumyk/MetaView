@@ -10,6 +10,8 @@ import java.util.List;
 
 import javafx.scene.image.Image;
 
+import org.apache.commons.io.FileUtils;
+import org.apache.http.client.fluent.Request;
 import org.tjumyk.metaview.Main;
 import org.tjumyk.metaview.data.DataLoader;
 
@@ -17,8 +19,7 @@ public class VideoFrameCapture {
 	private static File ffmpeg;
 
 	public static Image getCache(String video, double second, int height)
-			throws IOException, InterruptedException,
-			VideoFrameCaptureException {
+			throws IOException {
 		File tmp = new File(Main.TEMP_DIR + video.hashCode() + "_" + second
 				+ "_" + height + ".jpg");
 		Image img = null;
@@ -27,9 +28,40 @@ public class VideoFrameCapture {
 		return img;
 	}
 
+	public static Image getFromFolder(String video, String folder,
+			double second, int height) throws IOException {
+		if (!folder.startsWith("file:/"))
+			throw new IllegalArgumentException(
+					"folder name must be a valid url started with \"file:/\"!");
+		String path = folder.substring(6);
+		File tmp = new File(path + second + "_" + height + ".jpg");
+		Image img = null;
+		if (tmp.exists())
+			img = new Image(tmp.toURI().toURL().toExternalForm());
+		return img;
+	}
+
+	public static Image getFromServer(String video, String serverBaseUrl,
+			double second, int height) throws IOException {
+		File tmp = new File(Main.TEMP_DIR + video.hashCode() + "_" + second
+				+ "_" + height + ".jpg");
+		String url = serverBaseUrl + second + "_" + height + ".jpg";
+		byte[] data = Request.Get(url).execute().returnContent().asBytes();
+		FileUtils.writeByteArrayToFile(tmp, data);
+		Image img = new Image(tmp.toURI().toURL().toExternalForm());
+		return img;
+	}
+
 	public static Image capture(String video, double second, int height)
 			throws IOException, InterruptedException,
 			VideoFrameCaptureException {
+		if (!video.startsWith("file:/"))
+			throw new IllegalArgumentException(
+					"video name must be a valid url started with \"file:/\"!");
+		String videoPath = video.substring(6);
+		File dir = new File(Main.TEMP_DIR);
+		if (!dir.exists())
+			dir.mkdirs();
 		File tmp = new File(Main.TEMP_DIR + video.hashCode() + "_" + second
 				+ "_" + height + ".jpg");
 		if (!tmp.exists()) {
@@ -42,7 +74,7 @@ public class VideoFrameCapture {
 			cmdList.add("-ss");
 			cmdList.add(Double.toString(second));
 			cmdList.add("-i");
-			cmdList.add(video);
+			cmdList.add(videoPath);
 			cmdList.add("-y");
 			cmdList.add("-vframes");
 			cmdList.add("1");

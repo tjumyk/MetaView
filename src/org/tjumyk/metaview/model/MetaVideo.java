@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class MetaVideo {
-	private String version, name, movieFile;
+	private String version, name, movieFile,frameImageFolder;
 	private int totalFrames,fps,width,height;
 
 	public int getWidth() {
@@ -69,6 +69,14 @@ public class MetaVideo {
 
 	public List<Category> getCategories() {
 		return categories;
+	}
+
+	public String getFrameImageFolder() {
+		return frameImageFolder;
+	}
+
+	public void setFrameImageFolder(String frameImageFolder) {
+		this.frameImageFolder = frameImageFolder;
 	}
 
 	private List<Segment> segments = new ArrayList<>();

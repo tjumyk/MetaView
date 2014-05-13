@@ -2,7 +2,6 @@ package org.tjumyk.metaview.controller;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.List;
@@ -398,16 +397,12 @@ public class BrowserController implements Initializable {
 		if (player != null) {
 			player.stop();
 		}
-		File file = new File(video.getMovieFile());
-		try {
-			Media media = new Media(file.toURI().toURL().toExternalForm());
-			player = new MediaPlayer(media);
-			player.currentTimeProperty().addListener(playerTimeListener);
-			model.getCurrentTime().bind(player.currentTimeProperty());
-			media_view.setMediaPlayer(player);
-		} catch (MalformedURLException e) {
-			e.printStackTrace();
-		}
+		Media media = new Media(video.getMovieFile());
+		player = new MediaPlayer(media);
+		player.currentTimeProperty().addListener(playerTimeListener);
+		model.getCurrentTime().bind(player.currentTimeProperty());
+		media_view.setMediaPlayer(player);
+
 		initPlayer();
 
 		NodeStyleUtil.bindStyle(model, nodeMap);
@@ -627,43 +622,90 @@ public class BrowserController implements Initializable {
 			ExecutorService pool = Executors.newFixedThreadPool(Runtime
 					.getRuntime().availableProcessors());
 			int size = video.getSegments().size();
-			
+
 			updateProgress(-1, size);
-			updateMessage(Main.getString("browse.loading_cache"));
+			updateMessage(Main.getString("browse.loading_frame_images_cache"));
 			int cachedCount = 0;
-			for(Segment segment : video.getSegments()){
+			for (Segment segment : video.getSegments()) {
 				int key = segment.getKey();
 				double second = 1.0 * segment.getKey() / video.getFps();
-				Image img = VideoFrameCapture.getCache(video.getMovieFile(), second, FRMAE_IMAGE_HEIGHT);
-				if(img != null){
+				Image img = VideoFrameCapture.getCache(video.getMovieFile(),
+						second, FRMAE_IMAGE_HEIGHT);
+				if (img != null) {
 					frameImageMap.put(key, img);
 					Thread.sleep(20);
-					cachedCount ++;
+					cachedCount++;
 				}
 			}
-			if(cachedCount == size){
+			if (cachedCount == size) {
 				return null;
 			}
-			updateMessage(Main.getString("browse.loading_ffmpeg"));
-			VideoFrameCapture.checkLoadFFmpeg();
-			updateProgress(0, size);
-			updateMessage(Main.getString("browse.loading_frame_images"));
-			for (Segment seg : video.getSegments()) {
-				double second = 1.0 * seg.getKey() / video.getFps();
-				pool.submit(new SubTaskRunnable(second, seg, pool));
-			}
-			pool.shutdown();
 
-			try {
-				boolean terminated = pool.awaitTermination(video.getSegments()
-						.size(), TimeUnit.MINUTES);
-				if (!terminated)
-					throw new RuntimeException(
-							"ThreadPool timeout, work may be incomplete.");
-				if (exception != null)
-					throw exception;
-			} catch (InterruptedException e) {
-				pool.shutdownNow();
+			if (!video.getMovieFile().startsWith("file:/")) {
+				updateMessage(Main
+						.getString("browse.loading_frame_images_from_server"));
+				int count = 0;
+				for (Segment segment : video.getSegments()) {
+					int key = segment.getKey();
+					if (frameImageMap.containsKey(key))
+						continue;
+					double second = 1.0 * segment.getKey() / video.getFps();
+					Image img = VideoFrameCapture.getFromServer(
+							video.getMovieFile(), video.getFrameImageFolder(),
+							second, FRMAE_IMAGE_HEIGHT);
+					if (img != null) {
+						frameImageMap.put(key, img);
+					}
+					count++;
+					updateProgress(count, size);
+				}
+			} else {
+				updateMessage(Main.getString("browse.loading_from_local_folder"));
+				String folder = video.getFrameImageFolder();
+				if (folder != null && folder.length() > 0) {
+					int loaded = 0;
+					for (Segment segment : video.getSegments()) {
+						int key = segment.getKey();
+						if (frameImageMap.containsKey(key)){
+							loaded ++;
+							continue;
+						}
+						double second = 1.0 * segment.getKey() / video.getFps();
+						Image img = VideoFrameCapture.getFromFolder(
+								video.getMovieFile(), folder, second,
+								FRMAE_IMAGE_HEIGHT);
+						if (img != null) {
+							frameImageMap.put(key, img);
+							Thread.sleep(20);
+							loaded++;
+						}
+					}
+					if(loaded == size){
+						return null;
+					}
+				}
+
+				updateMessage(Main.getString("browse.loading_ffmpeg"));
+				VideoFrameCapture.checkLoadFFmpeg();
+				updateProgress(0, size);
+				updateMessage(Main.getString("browse.loading_frame_images"));
+				for (Segment seg : video.getSegments()) {
+					double second = 1.0 * seg.getKey() / video.getFps();
+					pool.submit(new SubTaskRunnable(second, seg, pool));
+				}
+				pool.shutdown();
+
+				try {
+					boolean terminated = pool.awaitTermination(video
+							.getSegments().size(), TimeUnit.MINUTES);
+					if (!terminated)
+						throw new RuntimeException(
+								"ThreadPool timeout, work may be incomplete.");
+					if (exception != null)
+						throw exception;
+				} catch (InterruptedException e) {
+					pool.shutdownNow();
+				}
 			}
 			return null;
 		}
