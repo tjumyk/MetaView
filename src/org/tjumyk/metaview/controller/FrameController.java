@@ -1,30 +1,36 @@
 package org.tjumyk.metaview.controller;
 
-import java.awt.GraphicsEnvironment;
-import java.awt.Rectangle;
 import java.io.IOException;
 import java.net.URL;
 import java.util.ResourceBundle;
 
+import javafx.application.Platform;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
+import javafx.geometry.Rectangle2D;
 import javafx.scene.Node;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.Pane;
+import javafx.stage.Screen;
 import javafx.stage.Stage;
 
 import org.tjumyk.metaview.Main;
+import org.tjumyk.metaview.util.ResizeUtil;
 
 public class FrameController implements Initializable {
 
 	@FXML
-	Pane root, container;
+	Pane root, container, root_wrapper;
 
 	@FXML
 	Pane nav_list;
+
+	@FXML
+	Pane resize_handler;
 
 	private PanelControllerBase panelController;
 
@@ -83,18 +89,26 @@ public class FrameController implements Initializable {
 			public void onChanged(Change<? extends String> c) {
 				Stage stage = Main.getStage();
 				if (c.getList().contains("max")) {
-					Rectangle bounds = GraphicsEnvironment
-							.getLocalGraphicsEnvironment()
-							.getMaximumWindowBounds();
-					stage.setX(-10);
-					stage.setY(-10);
-					stage.setWidth(bounds.getWidth() + 20);
-					stage.setHeight(bounds.getHeight() + 20);
+					Rectangle2D bounds = Screen.getPrimary().getVisualBounds();
+					stage.setX(0);
+					stage.setY(0);
+					stage.setWidth(bounds.getWidth());
+					stage.setHeight(bounds.getHeight());
+					AnchorPane.setLeftAnchor(root_wrapper, 0.0);
+					AnchorPane.setRightAnchor(root_wrapper, 0.0);
+					AnchorPane.setTopAnchor(root_wrapper, 0.0);
+					AnchorPane.setBottomAnchor(root_wrapper, 0.0);
+					resize_handler.setDisable(true);
 				} else {
 					stage.setWidth(Main.STAGE_WIDTH);
 					stage.setHeight(Main.STAGE_HEIGHT);
-					if (stage.getX() == -10 && stage.getY() == -10)
+					AnchorPane.setLeftAnchor(root_wrapper, 10.0);
+					AnchorPane.setRightAnchor(root_wrapper, 10.0);
+					AnchorPane.setTopAnchor(root_wrapper, 10.0);
+					AnchorPane.setBottomAnchor(root_wrapper, 10.0);
+					if (stage.getX() == 0 && stage.getY() == 0)
 						stage.centerOnScreen();
+					resize_handler.setDisable(false);
 				}
 			}
 		});
@@ -109,5 +123,10 @@ public class FrameController implements Initializable {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+
+		Platform.runLater(() -> {
+			ResizeUtil.setResizeHandler(root.getScene().getWindow(),
+					resize_handler);
+		});
 	}
 }

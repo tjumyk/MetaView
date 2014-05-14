@@ -3,13 +3,14 @@
 <?import java.lang.*?>
 <?import java.net.*?>
 <?import javafx.geometry.*?>
+<?import javafx.scene.*?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.image.*?>
 <?import javafx.scene.layout.*?>
 
 <AnchorPane fx:id="root" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="700.0" prefWidth="1200.0" styleClass="root" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.tjumyk.metaview.controller.FrameController">
   <children>
-    <AnchorPane prefHeight="400.0" prefWidth="600.0" styleClass="background" AnchorPane.bottomAnchor="10.0" AnchorPane.leftAnchor="10.0" AnchorPane.rightAnchor="10.0" AnchorPane.topAnchor="10.0">
+    <AnchorPane fx:id="root_wrapper" prefHeight="400.0" prefWidth="600.0" styleClass="background" AnchorPane.bottomAnchor="10.0" AnchorPane.leftAnchor="10.0" AnchorPane.rightAnchor="10.0" AnchorPane.topAnchor="10.0">
       <children>
         <AnchorPane onMouseClicked="#onDoubleClickNavBar" prefHeight="93.0" prefWidth="1180.0" styleClass="nav_bar" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
           <children>
@@ -97,7 +98,10 @@
         </AnchorPane>
         <AnchorPane fx:id="container" onMouseDragged="#onDisableDrag" prefHeight="583.0" prefWidth="1180.0" styleClass="container" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="90.0" />
       </children>
-    </AnchorPane>
+    </AnchorPane><StackPane fx:id="resize_handler" layoutX="1185.0" layoutY="685.0" prefHeight="10.0" prefWidth="10.0" AnchorPane.bottomAnchor="5.0" AnchorPane.rightAnchor="5.0">
+<cursor>
+<Cursor fx:constant="SE_RESIZE" />
+</cursor></StackPane>
   </children>
   <stylesheets>
     <URL value="@../css/theme.css" />
