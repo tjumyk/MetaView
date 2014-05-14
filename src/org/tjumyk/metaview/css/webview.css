@@ -1,12 +1,10 @@
 body{
-  background-color:black;
+  background-color:rgb(244,244,244);
   font-family: Helvetica, Arial, 'Microsoft Yahei', STXihei, sans-serif;
   font-size:16px;
-  color:whitesmoke;
-  //text-shadow: rgba(34, 34, 34, 0.6) 1px 1px 1px;
   -webkit-font-smoothing: antialiased;
 }
-*:first-letter{
+.para:first-letter{
   font-size:30px;
   margin-right:3px;
   float:left; 
@@ -14,4 +12,13 @@ body{
 .photo{
   margin: 0 10px 10px 0;
   float:left;
+}
+.link{
+  color:white;
+  background-color: rgb(91, 192, 222);
+  border-color: rgb(70, 184, 218);
+  padding: 6px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+  text-decoration:none;
 }

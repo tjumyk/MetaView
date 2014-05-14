@@ -20,7 +20,6 @@ import javafx.collections.ObservableList;
 import javafx.concurrent.Task;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
-import javafx.fxml.Initializable;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.geometry.Side;
@@ -31,6 +30,7 @@ import javafx.scene.control.Label;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TitledPane;
+import javafx.scene.control.Tooltip;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
@@ -65,7 +65,7 @@ import org.tjumyk.metaview.viewmodel.LogicAction;
 import org.tjumyk.metaview.viewmodel.LogicUnit;
 import org.tjumyk.metaview.viewmodel.PlayerModel;
 
-public class BrowserController implements Initializable {
+public class BrowserController extends PanelControllerBase {
 
 	private static final int FRMAE_IMAGE_HEIGHT = 80;
 	private static final int FRMAE_TITLE_WIDTH = 100, FRMAE_TITLE_HEIGHT = 36;
@@ -129,6 +129,11 @@ public class BrowserController implements Initializable {
 		initUI();
 		parseParam();
 		startLoad();
+	}
+
+	@Override
+	public void execCommand(String id) {
+		System.out.println("[Command] " + id);
 	}
 
 	private void initKeyBinding() {
@@ -202,10 +207,10 @@ public class BrowserController implements Initializable {
 		accordion_category_list.expandedPaneProperty().addListener(
 				(observable, oldValue, newValue) -> {
 					if (newValue == null)
-						webview_info.getEngine().loadContent("");
+						showWebViewInfo(null);
 					else {
 						Category cat = (Category) newValue.getUserData();
-						webview_info.getEngine().loadContent(cat.getInfo());
+						showWebViewInfo(cat.getInfo());
 					}
 
 				});
@@ -240,6 +245,15 @@ public class BrowserController implements Initializable {
 						}
 					});
 		});
+	}
+
+	private void showWebViewInfo(String info) {
+		if (info == null)
+			webview_info.getEngine().loadContent("");
+		else if (info.startsWith("http://") || info.startsWith("https://"))
+			webview_info.getEngine().load(info);
+		else
+			webview_info.getEngine().loadContent(info);
 	}
 
 	private ContextMenu buildContextMenu() {
@@ -382,6 +396,7 @@ public class BrowserController implements Initializable {
 				box.getStyleClass().addAll("box", "group");
 				box.setPadding(new Insets(3));
 				box.setAlignment(Pos.CENTER);
+				Tooltip.install(box, new Tooltip(group.getName()));
 				ImageView img = new ImageView(frameImageMap.get(group.getKey()));
 				img.setPreserveRatio(true);
 				Label label = new Label(group.getName());
@@ -488,7 +503,7 @@ public class BrowserController implements Initializable {
 		if (group == showSegmentsGroup)
 			return;
 		showSegmentsGroup = group;
-		webview_info.getEngine().loadContent(group.getInfo());
+		showWebViewInfo(group.getInfo());
 		flow_shot_list.getChildren().clear();
 		for (Segment seg : group.getSegments()) {
 			flow_shot_list.getChildren().add(nodeMap.get(seg));
@@ -644,7 +659,7 @@ public class BrowserController implements Initializable {
 			int size = video.getSegments().size();
 
 			updateProgress(-1, size);
-			updateMessage(Main.getString("browse.loading_frame_images_cache"));
+			updateMessage(Main.getString("media.loading_frame_images_cache"));
 			int cachedCount = 0;
 			for (Segment segment : video.getSegments()) {
 				int key = segment.getKey();
@@ -663,7 +678,7 @@ public class BrowserController implements Initializable {
 
 			if (!video.getMovieFile().startsWith("file:/")) {
 				updateMessage(Main
-						.getString("browse.loading_frame_images_from_server"));
+						.getString("media.loading_frame_images_from_server"));
 				int count = 0;
 				for (Segment segment : video.getSegments()) {
 					int key = segment.getKey();
@@ -680,8 +695,7 @@ public class BrowserController implements Initializable {
 					updateProgress(count, size);
 				}
 			} else {
-				updateMessage(Main
-						.getString("browse.loading_from_local_folder"));
+				updateMessage(Main.getString("media.loading_from_local_folder"));
 				String folder = video.getFrameImageFolder();
 				if (folder != null && folder.length() > 0) {
 					int loaded = 0;
@@ -706,10 +720,10 @@ public class BrowserController implements Initializable {
 					}
 				}
 
-				updateMessage(Main.getString("browse.loading_ffmpeg"));
+				updateMessage(Main.getString("media.loading_ffmpeg"));
 				VideoFrameCapture.checkLoadFFmpeg();
 				updateProgress(0, size);
-				updateMessage(Main.getString("browse.loading_frame_images"));
+				updateMessage(Main.getString("media.loading_frame_images"));
 				for (Segment seg : video.getSegments()) {
 					double second = 1.0 * seg.getKey() / video.getFps();
 					pool.submit(new SubTaskRunnable(second, seg, pool));

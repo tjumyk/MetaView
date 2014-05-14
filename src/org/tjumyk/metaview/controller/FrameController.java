@@ -4,11 +4,7 @@ import java.awt.GraphicsEnvironment;
 import java.awt.Rectangle;
 import java.io.IOException;
 import java.net.URL;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.ResourceBundle;
-
-import org.tjumyk.metaview.Main;
 
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
@@ -17,19 +13,20 @@ import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.scene.Node;
 import javafx.scene.input.MouseEvent;
-import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.Pane;
 import javafx.stage.Stage;
 
+import org.tjumyk.metaview.Main;
 
 public class FrameController implements Initializable {
-	private Map<String, Pane> panels = new HashMap<String, Pane>();
 
 	@FXML
 	Pane root, container;
 
 	@FXML
 	Pane nav_list;
+
+	private PanelControllerBase panelController;
 
 	@FXML
 	void onWindowMinimize(MouseEvent event) {
@@ -55,6 +52,7 @@ public class FrameController implements Initializable {
 	void onSelectNav(MouseEvent event) throws IOException {
 		Node source = (Node) event.getSource();
 		selectNav(source);
+		event.consume();
 	}
 
 	@FXML
@@ -75,26 +73,7 @@ public class FrameController implements Initializable {
 
 	private void selectNav(Node sourceNode) throws IOException {
 		String sourceID = sourceNode.getId();
-		String fxmlID = sourceID.replace("nav_", "panel_");
-		Pane panel = panels.get(fxmlID);
-		for (Node node : nav_list.getChildren()) {
-			node.getStyleClass().remove("active");
-		}
-		sourceNode.getStyleClass().add("active");
-		if (panel == null) {
-			panel = FXMLLoader.load(
-					Main.class.getResource("fxml/" + fxmlID + ".fxml"),
-					Main.getResources());
-			AnchorPane.setTopAnchor(panel, 0.0);
-			AnchorPane.setBottomAnchor(panel, 0.0);
-			AnchorPane.setLeftAnchor(panel, 0.0);
-			AnchorPane.setRightAnchor(panel, 0.0);
-		}
-		if (panel != null) {
-			panels.put(fxmlID, panel);
-			container.getChildren().clear();
-			container.getChildren().add(panel);
-		}
+		panelController.execCommand(sourceID.substring(4));
 	}
 
 	@Override
@@ -121,7 +100,12 @@ public class FrameController implements Initializable {
 		});
 
 		try {
-			selectNav(nav_list.getChildren().get(0));
+			container.getChildren().clear();
+			FXMLLoader loader = new FXMLLoader(
+					Main.class.getResource("fxml/panel_browser.fxml"),
+					Main.getResources());
+			container.getChildren().add(loader.load());
+			panelController = loader.getController();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}

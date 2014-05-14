@@ -3,7 +3,7 @@ package org.tjumyk.metaview.model;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
-import java.net.URL;
+import java.net.MalformedURLException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -27,39 +27,10 @@ public class MetaVideoParser {
 		video.setWidth(Integer.parseInt(root.getAttribute("width")));
 		video.setHeight(Integer.parseInt(root.getAttribute("height")));
 
-		String filePath = root.getAttribute("movie_file");
-		if (filePath.startsWith("http://") || filePath.startsWith("ftp://")
-				|| filePath.startsWith("https://")) {
-			URL url = new URL(filePath);
-			video.setMovieFile(url.toExternalForm());
-		} else {
-			File movieFile = new File(filePath);
-			if (!movieFile.exists() || !movieFile.isFile()) {
-				movieFile = new File(file.getParent() + File.separatorChar
-						+ filePath);
-				if (!movieFile.exists() || !movieFile.isFile())
-					movieFile = null;
-			}
-			if (movieFile != null)
-				video.setMovieFile(movieFile.toURI().toURL().toExternalForm());
-		}
-		String folderPath = root.getAttribute("frame_image_folder");
-		if (folderPath.startsWith("http://") || folderPath.startsWith("ftp://")
-				|| folderPath.startsWith("https://")) {
-			URL url = new URL(folderPath);
-			video.setFrameImageFolder(url.toExternalForm());
-		} else {
-			File imageFolder = new File(folderPath);
-			if (!imageFolder.exists() || !imageFolder.isDirectory()) {
-				imageFolder = new File(file.getParent() + File.separatorChar
-						+ folderPath);
-				if (!imageFolder.exists() || !imageFolder.isDirectory())
-					imageFolder = null;
-			}
-			if (imageFolder != null)
-				video.setFrameImageFolder(imageFolder.toURI().toURL()
-						.toExternalForm());
-		}
+		video.setMovieFile(parsePath(file, root.getAttribute("movie_file"),
+				true));
+		video.setFrameImageFolder(parsePath(file,
+				root.getAttribute("frame_image_folder"), false));
 
 		Element segmentsElement = XMLParser.getDirectChildElementsByName(root,
 				"segments").get(0);
@@ -109,5 +80,24 @@ public class MetaVideoParser {
 		}
 
 		return video;
+	}
+
+	private static String parsePath(File baseFile, String path, boolean isFile)
+			throws MalformedURLException {
+		if (path.startsWith("http://") || path.startsWith("ftp://")
+				|| path.startsWith("https://")) {
+			return path;
+		} else {
+			File file = new File(path);
+			if (!file.exists() || isFile != file.isFile()) {
+				file = new File(baseFile.getParent() + File.separatorChar
+						+ path);
+				if (!file.exists() || isFile != file.isFile())
+					file = null;
+			}
+			if (file != null)
+				return file.toURI().toURL().toExternalForm();
+		}
+		return null;
 	}
 }

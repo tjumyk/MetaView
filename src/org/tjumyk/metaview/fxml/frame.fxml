@@ -34,14 +34,14 @@
             </HBox>
             <HBox fx:id="nav_list" alignment="TOP_CENTER" onMouseDragged="#onDisableDrag" prefHeight="70.0" prefWidth="569.0" spacing="10.0" AnchorPane.leftAnchor="300.0" AnchorPane.rightAnchor="300.0" AnchorPane.topAnchor="20.0">
               <children>
-                <VBox fx:id="nav_browser" alignment="TOP_CENTER" onMouseClicked="#onSelectNav" prefHeight="180.0" prefWidth="120.0" style="&#10;" styleClass="nav">
+                <VBox fx:id="nav_open" alignment="TOP_CENTER" onMouseClicked="#onSelectNav" prefHeight="180.0" prefWidth="120.0" style="&#10;" styleClass="nav">
                   <children>
                     <ImageView id="news.png" fitHeight="45.0" fitWidth="45.0">
                       <image>
                         <Image url="@../images/video.png" />
                       </image>
                     </ImageView>
-                    <Label text="%nav.browse" />
+                    <Label text="%nav.open" />
                   </children>
                   <padding>
                     <Insets bottom="10.0" fx:id="x1" />

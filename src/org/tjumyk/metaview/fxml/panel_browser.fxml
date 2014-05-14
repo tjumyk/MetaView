@@ -9,15 +9,23 @@
 <?import javafx.scene.web.*?>
 
 <AnchorPane id="AnchorPane" fx:id="root" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="590.0" prefWidth="1260.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.tjumyk.metaview.controller.BrowserController">
-  <children><SplitPane dividerPositions="0.29, 0.71" focusTraversable="true" prefHeight="400.0" prefWidth="600.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-  <items><SplitPane fx:id="pane_meta_browse" dividerPositions="0.6292517006802721" focusTraversable="true" layoutX="-13.0" layoutY="64.0" orientation="VERTICAL" prefHeight="200.0" prefWidth="160.0">
+  <children><SplitPane dividerPositions="0.2901430842607313, 0.7178060413354531" focusTraversable="true" prefHeight="400.0" prefWidth="600.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+  <items><SplitPane fx:id="pane_meta_browse" dividerPositions="0.6326530612244898" focusTraversable="true" layoutX="-13.0" layoutY="64.0" orientation="VERTICAL" prefHeight="200.0" prefWidth="160.0">
   <items>
-<VBox>
-<children><Label text="%browse.category_list" /><Accordion fx:id="accordion_category_list" layoutX="50.5" layoutY="68.0" prefHeight="291.0" prefWidth="292.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" VBox.vgrow="SOMETIMES" />
+<VBox alignment="TOP_CENTER">
+<children>
+<HBox alignment="TOP_CENTER" styleClass="header-label">
+<children><Label text="%metabox.category_list" />
+</children>
+</HBox><Accordion fx:id="accordion_category_list" layoutX="50.5" layoutY="68.0" prefHeight="291.0" prefWidth="292.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" VBox.vgrow="SOMETIMES" />
 </children>
 </VBox>
-<VBox>
-<children><Label text="%browse.shot_list" />
+<VBox alignment="TOP_CENTER">
+<children>
+<HBox alignment="TOP_CENTER" styleClass="header-label">
+<children><Label text="%metabox.shot_list" />
+</children>
+</HBox>
 <ScrollPane fitToHeight="true" fitToWidth="true" prefViewportHeight="276.0" prefViewportWidth="357.0" VBox.vgrow="SOMETIMES">
 <content><FlowPane fx:id="flow_shot_list" hgap="2.0" prefHeight="200.0" prefWidth="200.0" vgap="2.0" VBox.vgrow="SOMETIMES" />
 </content>
@@ -28,7 +36,7 @@
 </children>
 </VBox>
   </items>
-</SplitPane><SplitPane dividerPositions="0.8040201005025126" focusTraversable="true" layoutX="54.0" layoutY="69.0" orientation="VERTICAL" prefHeight="200.0" prefWidth="160.0">
+</SplitPane><SplitPane dividerPositions="0.7431972789115646" focusTraversable="true" layoutX="54.0" layoutY="69.0" orientation="VERTICAL" prefHeight="200.0" prefWidth="160.0">
   <items>
     <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="100.0" prefWidth="160.0">
 <children>
@@ -64,18 +72,42 @@
 </StackPane>
 </children></AnchorPane><WebView fx:id="webview_info" layoutX="14.0" layoutY="-71.0" prefHeight="200.0" prefWidth="200.0" />
   </items>
-</SplitPane><SplitPane dividerPositions="0.18197278911564627, 0.6768707482993197" focusTraversable="true" layoutX="-20.0" layoutY="80.0" orientation="VERTICAL" prefHeight="200.0" prefWidth="160.0">
+</SplitPane><SplitPane dividerPositions="0.21428571428571427, 0.6768707482993197" focusTraversable="true" layoutX="-20.0" layoutY="80.0" orientation="VERTICAL" prefHeight="200.0" prefWidth="160.0">
   <items>
-    <ScrollPane id="pane_relation" fx:id="pane_relation" fitToHeight="true" fitToWidth="true" minHeight="0.0" minWidth="0.0" pannable="true" prefHeight="100.0" prefWidth="160.0" HBox.hgrow="ALWAYS">
-<padding>
-<Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
-</padding></ScrollPane><ScrollPane fx:id="pane_zoom_in" fitToHeight="true" fitToWidth="true" prefHeight="200.0" prefWidth="200.0">
-<padding>
-<Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
-</padding></ScrollPane><ScrollPane fx:id="pane_block" fitToHeight="true" fitToWidth="true" prefHeight="200.0" prefWidth="200.0">
+<VBox>
+<children><HBox alignment="TOP_CENTER" styleClass="header-label">
+<children>
+<Label text="%chart.relation_map" />
+</children>
+</HBox>
+    <ScrollPane id="pane_relation" fx:id="pane_relation" fitToHeight="true" fitToWidth="true" minHeight="0.0" minWidth="0.0" pannable="true" prefHeight="100.0" prefWidth="160.0" HBox.hgrow="ALWAYS" VBox.vgrow="ALWAYS">
 <padding>
 <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
 </padding></ScrollPane>
+</children>
+</VBox>
+<VBox>
+<children><HBox alignment="TOP_CENTER" styleClass="header-label">
+<children>
+<Label text="%chart.zoom_in" />
+</children>
+</HBox><ScrollPane fx:id="pane_zoom_in" fitToHeight="true" fitToWidth="true" prefHeight="200.0" prefWidth="200.0" VBox.vgrow="ALWAYS">
+<padding>
+<Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+</padding></ScrollPane>
+</children>
+</VBox>
+<VBox>
+<children><HBox alignment="TOP_CENTER" styleClass="header-label">
+<children>
+<Label text="%chart.block" />
+</children>
+</HBox><ScrollPane fx:id="pane_block" fitToHeight="true" fitToWidth="true" prefHeight="200.0" prefWidth="200.0" VBox.vgrow="ALWAYS">
+<padding>
+<Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+</padding></ScrollPane>
+</children>
+</VBox>
   </items>
 </SplitPane>
   </items>
