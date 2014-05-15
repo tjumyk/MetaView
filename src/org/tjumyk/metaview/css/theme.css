@@ -86,13 +86,13 @@
 
 /* title styles */
 .app_title{
-	-fx-font-size:36px;
+	-fx-font-size:32px;
 	-fx-text-fill:whitesmoke;
 	-fx-font-weight:bold;
 	-fx-effect: innershadow(three-pass-box,black,4,0,0,0);
 }
 .app_version{
-	-fx-font-size:18px;
+	-fx-font-size:14px;
 	-fx-text-fill:whitesmoke;
 	-fx-font-weight:bold;
 	-fx-effect: innershadow(three-pass-box,black,2,0,0,0);
@@ -241,10 +241,12 @@
 .media-control-btn{
 	-fx-opacity:0.75;
 }
-.media-control-btn:hover {
+
+/* styles for image buttons*/
+.image-btn:hover {
 	-fx-effect:dropshadow(three-pass-box,black,5,0,1,1);
 }
-.media-control-btn:pressed{
+.image-btn:pressed{
 	-fx-translate-x:1px;
 	-fx-translate-y:1px;
 	-fx-effect:dropshadow(three-pass-box,black,5,0,0,0);
@@ -255,4 +257,12 @@
 	-fx-background-color: -fx-box-border, -fx-inner-border, -fx-body-color;
 	-fx-font-size:12px;
 	-fx-padding:2px;
+}
+
+/* styles for about info */
+#grid_about_info{
+	-fx-font-size:16px;
+}
+#grid_about_info .email{
+	-fx-font-size:12px;
 }

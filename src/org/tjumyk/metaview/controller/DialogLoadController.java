@@ -13,6 +13,7 @@ import javafx.fxml.FXML;
 import javafx.scene.control.Label;
 import javafx.scene.control.ProgressBar;
 import javafx.scene.control.TextArea;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
 
 public class DialogLoadController extends DialogControllerBase {
@@ -66,7 +67,15 @@ public class DialogLoadController extends DialogControllerBase {
 	}
 
 	@FXML
-	void onCancel(ActionEvent event) {
+	void onCancelAction(ActionEvent event) {
+		if (task != null && task.isRunning()) {
+			task.cancel();
+		} else
+			super.closeDialog(root);
+	}
+	
+	@FXML
+	void onCancel(MouseEvent event) {
 		if (task != null && task.isRunning()) {
 			task.cancel();
 		} else

@@ -81,6 +81,7 @@ public class Main extends Application {
 				quit();
 			}
 		});
+		setIcons(stage);
 
 		stage.show();
 	}
@@ -99,6 +100,22 @@ public class Main extends Application {
 
 		loader.<DialogControllerBase> getController().initData(data);
 		dialogStage.show();
+	}
+
+	/**
+	 * 设置窗口的图标
+	 * 
+	 * @param stage
+	 *            目标窗口
+	 */
+	private void setIcons(Stage stage) {
+		String[] icons = { "logo_16.png", "logo_32.png", "logo_48.png",
+				"logo_128.png", "logo_256.png" };
+		for (String icon : icons) {
+			stage.getIcons()
+					.addAll(new Image(Main.class.getResourceAsStream("images/"
+							+ icon)));
+		}
 	}
 
 	public static void quit() {

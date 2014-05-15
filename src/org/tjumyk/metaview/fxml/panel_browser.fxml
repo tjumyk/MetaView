@@ -47,19 +47,19 @@
 <children>
 <StackPane>
 <children>
-<ImageView fx:id="img_play" onMouseClicked="#onPlay" styleClass="media-control-btn">
+<ImageView fx:id="img_play" onMouseClicked="#onPlay" styleClass="media-control-btn,image-btn">
 <image>
 <Image url="@../images/play.png" />
 </image>
 </ImageView>
-<ImageView fx:id="img_pause" onMouseClicked="#onPause" styleClass="media-control-btn" visible="false">
+<ImageView fx:id="img_pause" onMouseClicked="#onPause" styleClass="media-control-btn,image-btn" visible="false">
 <image>
 <Image url="@../images/pause.png" />
 </image>
 </ImageView>
 </children>
 </StackPane>
-<ImageView fx:id="img_replay" onMouseClicked="#onReplay" styleClass="media-control-btn">
+<ImageView fx:id="img_replay" onMouseClicked="#onReplay" styleClass="media-control-btn,image-btn">
 <image>
 <Image url="@../images/replay.png" />
 </image>

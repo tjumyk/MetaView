@@ -51,6 +51,7 @@ import javafx.stage.FileChooser;
 import javafx.stage.FileChooser.ExtensionFilter;
 import javafx.util.Duration;
 
+import org.controlsfx.dialog.Dialogs;
 import org.tjumyk.metaview.Main;
 import org.tjumyk.metaview.controll.BlockSequencePane;
 import org.tjumyk.metaview.controll.MetaRelationPane;
@@ -133,7 +134,23 @@ public class BrowserController extends PanelControllerBase {
 
 	@Override
 	public void execCommand(String id) {
-		System.out.println("[Command] " + id);
+		try {
+			switch (id) {
+			case "open":
+				if (openNewFile())
+					loadFrameImages();
+				break;
+			case "about":
+				Main.openDialog("dialog_about.fxml", null);
+				break;
+
+			default:
+				System.out.println("[Unknown Command] " + id);
+				break;
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 	}
 
 	private void initKeyBinding() {
@@ -302,9 +319,10 @@ public class BrowserController extends PanelControllerBase {
 			@Override
 			public void run() {
 				if (video == null) {
-					openNewFile();
-				}
-				loadFrameImages();
+					if (openNewFile())
+						loadFrameImages();
+				} else
+					loadFrameImages();
 			}
 		});
 	}
@@ -323,19 +341,26 @@ public class BrowserController extends PanelControllerBase {
 		}
 	}
 
-	private void openNewFile() {
+	private boolean openNewFile() {
 		FileChooser chooser = new FileChooser();
 		chooser.setTitle(Main.getString("filechooser.choose_metavideo"));
 		chooser.getExtensionFilters().add(
 				new ExtensionFilter("MetaVideo Description File", "*.mvd"));
 		chooser.setInitialDirectory(new File(System.getProperty("user.dir")));
 		File file = chooser.showOpenDialog(Main.getStage());
-		try {
-			if (file != null && file.exists())
+
+		if (file != null && file.exists()) {
+			try {
 				video = MetaVideoParser.parse(file);
-		} catch (Exception e) {
-			e.printStackTrace();
+				return true;
+			} catch (Exception e) {
+				Dialogs.create().title(Main.getString("error.title"))
+						.masthead(Main.getString("error.parse_error"))
+						.showException(e);
+				e.printStackTrace();
+			}
 		}
+		return false;
 	}
 
 	private void loadFrameImages() {

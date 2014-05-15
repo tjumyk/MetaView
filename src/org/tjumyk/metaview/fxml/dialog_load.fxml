@@ -4,19 +4,29 @@
 <?import java.net.*?>
 <?import javafx.geometry.*?>
 <?import javafx.scene.control.*?>
+<?import javafx.scene.image.*?>
 <?import javafx.scene.layout.*?>
 
 <AnchorPane id="AnchorPane" fx:id="root" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="200.0" prefWidth="440.0" styleClass="root" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="org.tjumyk.metaview.controller.DialogLoadController">
   <children>
     <AnchorPane prefHeight="298.0" prefWidth="422.0" styleClass="background, dialog" AnchorPane.bottomAnchor="10.0" AnchorPane.leftAnchor="10.0" AnchorPane.rightAnchor="10.0" AnchorPane.topAnchor="10.0">
-      <children>
-        <HBox alignment="CENTER_LEFT" prefHeight="36.0" prefWidth="380.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-          <children><Label text="%dialog.loading" />
-          </children>
-          <padding>
-            <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
-          </padding>
-        </HBox>
+      <children><GridPane layoutX="5.0" layoutY="5.0" AnchorPane.leftAnchor="5.0" AnchorPane.rightAnchor="5.0">
+<children>
+<Label text="%dialog.loading" />
+<ImageView onMouseClicked="#onCancel" styleClass="image-btn" GridPane.columnIndex="1">
+<image>
+<Image url="@../images/dialog_close.png" />
+</image>
+</ImageView>
+</children>
+<columnConstraints>
+<ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" />
+<ColumnConstraints halignment="RIGHT" hgrow="SOMETIMES" minWidth="10.0" />
+</columnConstraints>
+<rowConstraints>
+<RowConstraints minHeight="10.0" vgrow="SOMETIMES" />
+</rowConstraints>
+</GridPane>
         <AnchorPane prefHeight="240.0" prefWidth="380.0" styleClass="dialog_container" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="36.0">
           <children>
                 <GridPane id="GridPane" layoutX="157.0" layoutY="202.0" prefHeight="42.0" prefWidth="380.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0">
@@ -26,7 +36,7 @@
 <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
 </padding>
 </HBox><HBox alignment="CENTER_RIGHT" prefHeight="100.0" prefWidth="200.0" spacing="5.0" GridPane.columnIndex="1">
-<children><Button mnemonicParsing="false" onAction="#onCancel" text="%dialog.cancel" />
+<children><Button mnemonicParsing="false" onAction="#onCancelAction" text="%dialog.cancel" />
 </children>
 <padding>
 <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
