@@ -62,6 +62,7 @@ public class MetaVideoParser {
 			for (Element groupElement : XMLParser.getDirectChildElementsByName(
 					categoryElement, "group")) {
 				Group group = new Group();
+				group.setCategory(cat);
 				group.setKey(Integer.parseInt(groupElement.getAttribute("key")));
 				group.setName(groupElement.getAttribute("name"));
 				group.setInfo(XMLParser.getFirstDirectChildElementByName(

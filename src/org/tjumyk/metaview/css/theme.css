@@ -266,3 +266,18 @@
 #grid_about_info .email{
 	-fx-font-size:12px;
 }
+
+/* styles for zoom in list */
+.zoom-in .name{
+	-fx-font-size: 14px;
+}
+.zoom-in .desc{
+	-fx-font-size: 12px;
+	-fx-text-fill: grey;
+}
+#list_zoom_in .cell:selected .zoom-in .desc{
+	-fx-text-fill: whitesmoke;
+}
+#list_zoom_in{
+	-fx-background-color:rgb(244,244,244);
+}

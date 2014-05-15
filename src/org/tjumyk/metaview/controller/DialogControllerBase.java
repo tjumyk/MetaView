@@ -15,6 +15,7 @@ import javafx.util.Duration;
  * @author 宇锴
  */
 public abstract class DialogControllerBase implements Initializable {
+
 	/**
 	 * 抽象函数，用于传入数据参数
 	 * 
@@ -22,7 +23,7 @@ public abstract class DialogControllerBase implements Initializable {
 	 *            传入的数据
 	 */
 	public abstract void initData(Object data);
-
+	
 	/**
 	 * 显示对话框，带有动画
 	 * 

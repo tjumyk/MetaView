@@ -91,10 +91,7 @@
 <children>
 <Label text="%chart.zoom_in" />
 </children>
-</HBox><ScrollPane fx:id="pane_zoom_in" fitToHeight="true" fitToWidth="true" prefHeight="200.0" prefWidth="200.0" VBox.vgrow="ALWAYS">
-<padding>
-<Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
-</padding></ScrollPane>
+</HBox><ListView fx:id="list_zoom_in" prefHeight="200.0" prefWidth="200.0" VBox.vgrow="ALWAYS" />
 </children>
 </VBox>
 <VBox>

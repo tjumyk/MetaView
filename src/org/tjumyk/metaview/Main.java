@@ -81,6 +81,7 @@ public class Main extends Application {
 				quit();
 			}
 		});
+		stage.setTitle(getString("app.title") + " " + getString("app.version"));
 		setIcons(stage);
 
 		stage.show();

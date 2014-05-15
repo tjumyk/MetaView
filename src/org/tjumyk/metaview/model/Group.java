@@ -6,6 +6,7 @@ import java.util.List;
 public class Group {
 	private String name, info;
 	private int key;
+	private Category category;
 
 	public String getName() {
 		return name;
@@ -33,6 +34,14 @@ public class Group {
 
 	public List<Segment> getSegments() {
 		return segments;
+	}
+
+	public Category getCategory() {
+		return category;
+	}
+
+	public void setCategory(Category category) {
+		this.category = category;
 	}
 
 	private List<Segment> segments = new ArrayList<>();

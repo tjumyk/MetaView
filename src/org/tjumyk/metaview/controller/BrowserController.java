@@ -13,6 +13,7 @@ import java.util.concurrent.TimeUnit;
 
 import javafx.animation.FadeTransition;
 import javafx.application.Platform;
+import javafx.beans.binding.Bindings;
 import javafx.beans.property.Property;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
@@ -27,6 +28,7 @@ import javafx.scene.Node;
 import javafx.scene.control.Accordion;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.Label;
+import javafx.scene.control.ListView;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.control.TitledPane;
@@ -53,6 +55,7 @@ import javafx.util.Duration;
 
 import org.controlsfx.dialog.Dialogs;
 import org.tjumyk.metaview.Main;
+import org.tjumyk.metaview.cellfactory.ZoomInListFactory;
 import org.tjumyk.metaview.controll.BlockSequencePane;
 import org.tjumyk.metaview.controll.MetaRelationPane;
 import org.tjumyk.metaview.media.VideoFrameCapture;
@@ -90,7 +93,10 @@ public class BrowserController extends PanelControllerBase {
 	StackPane stack_media_view;
 
 	@FXML
-	ScrollPane pane_relation, pane_block, pane_zoom_in;
+	ScrollPane pane_relation, pane_block;
+
+	@FXML
+	ListView<Group> list_zoom_in;
 
 	@FXML
 	VBox box_controls;
@@ -108,6 +114,8 @@ public class BrowserController extends PanelControllerBase {
 	private SegmentSelectListener segmentSelectListener = new SegmentSelectListener();
 	private NodeMouseEnterListener nodeMouseEnterListener = new NodeMouseEnterListener();
 	private NodeMouseExitListener nodeMouseExitListener = new NodeMouseExitListener();
+
+	private ZoomInListFactory zoomInListCellFactory = new ZoomInListFactory();
 
 	private PlayerModel model;
 	private Map<Object, Node> nodeMap = new HashMap<>();
@@ -151,6 +159,10 @@ public class BrowserController extends PanelControllerBase {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+	}
+
+	public Map<Integer, Image> getFrameImageMap() {
+		return frameImageMap;
 	}
 
 	private void initKeyBinding() {
@@ -248,6 +260,8 @@ public class BrowserController extends PanelControllerBase {
 
 		webview_info.getEngine().setUserStyleSheetLocation(
 				Main.class.getResource("css/webview.css").toExternalForm());
+
+		list_zoom_in.setCellFactory(zoomInListCellFactory);
 
 		Platform.runLater(() -> {
 			root.getScene().getWindow().focusedProperty()
@@ -495,6 +509,9 @@ public class BrowserController extends PanelControllerBase {
 		pane_relation.setContent(relPane);
 		BlockSequencePane blockPane = new BlockSequencePane(model);
 		pane_block.setContent(blockPane);
+
+		Bindings.bindContent(list_zoom_in.getItems(),
+				model.getRelatedGroupsInPlayList());
 	}
 
 	private class PlayerTimeListener implements ChangeListener<Duration> {
