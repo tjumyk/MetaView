@@ -19,6 +19,7 @@ import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
 import javafx.concurrent.Task;
+import javafx.concurrent.Worker.State;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.geometry.Insets;
@@ -48,10 +49,12 @@ import javafx.scene.media.Media;
 import javafx.scene.media.MediaPlayer;
 import javafx.scene.media.MediaPlayer.Status;
 import javafx.scene.media.MediaView;
+import javafx.scene.web.WebEngine;
 import javafx.scene.web.WebView;
 import javafx.stage.FileChooser;
 import javafx.stage.FileChooser.ExtensionFilter;
 import javafx.util.Duration;
+import netscape.javascript.JSObject;
 
 import org.controlsfx.dialog.Dialogs;
 import org.tjumyk.metaview.Main;
@@ -116,6 +119,9 @@ public class BrowserController extends PanelControllerBase {
 	private NodeMouseExitListener nodeMouseExitListener = new NodeMouseExitListener();
 
 	private ZoomInListFactory zoomInListCellFactory = new ZoomInListFactory();
+
+	private String injectJS;
+	private JSConnector connector = new JSConnector();
 
 	private PlayerModel model;
 	private Map<Object, Node> nodeMap = new HashMap<>();
@@ -258,8 +264,23 @@ public class BrowserController extends PanelControllerBase {
 		});
 		metaBoxContextMenu = buildContextMenu();
 
-		webview_info.getEngine().setUserStyleSheetLocation(
-				Main.class.getResource("css/webview.css").toExternalForm());
+		WebEngine engine = webview_info.getEngine();
+		engine.setUserStyleSheetLocation(Main.class.getResource(
+				"css/webview.css").toExternalForm());
+		engine.getLoadWorker().stateProperty()
+				.addListener(new ChangeListener<State>() {
+					@Override
+					public void changed(
+							ObservableValue<? extends State> observable,
+							State oldValue, State newValue) {
+						if (newValue == State.SUCCEEDED) {
+							JSObject win = (JSObject) engine
+									.executeScript("window");
+							win.setMember("fx", connector);
+							engine.executeScript(injectJS);
+						}
+					}
+				});
 
 		list_zoom_in.setCellFactory(zoomInListCellFactory);
 
@@ -276,14 +297,16 @@ public class BrowserController extends PanelControllerBase {
 						}
 					});
 		});
-		list_zoom_in.getSelectionModel().selectedItemProperty().addListener(new ChangeListener<Group>() {
-			@Override
-			public void changed(ObservableValue<? extends Group> observable,
-					Group oldValue, Group newValue) {
-				if(newValue != null)
-					model.getActiveNode().setValue(newValue);
-			}
-		});
+		list_zoom_in.getSelectionModel().selectedItemProperty()
+				.addListener(new ChangeListener<Group>() {
+					@Override
+					public void changed(
+							ObservableValue<? extends Group> observable,
+							Group oldValue, Group newValue) {
+						if (newValue != null)
+							model.getActiveNode().setValue(newValue);
+					}
+				});
 	}
 
 	private void showWebViewInfo(String info) {
@@ -493,10 +516,10 @@ public class BrowserController extends PanelControllerBase {
 					if (n == null)
 						return;
 					if (n instanceof Group) {
-						if(list_zoom_in.getItems().contains(n)){
-							list_zoom_in.getSelectionModel().select((Group)n);
+						if (list_zoom_in.getItems().contains(n)) {
+							list_zoom_in.getSelectionModel().select((Group) n);
 						}
-						
+
 						boolean find = false;
 						int catIndex = 0;
 						outer: for (Category cat : video.getCategories()) {
@@ -524,6 +547,45 @@ public class BrowserController extends PanelControllerBase {
 
 		Bindings.bindContent(list_zoom_in.getItems(),
 				model.getRelatedGroupsInPlayList());
+
+		buildInjectJS();
+	}
+
+	private void buildInjectJS() {
+		StringBuilder sb = new StringBuilder("var groups=[");
+		boolean isFirst = true;
+		for (Category cat : model.getVideo().getCategories()) {
+			for (Group group : cat.getGroups()) {
+				if (!isFirst)
+					sb.append(",");
+				sb.append("[\"");
+				sb.append(group.getName());
+				sb.append("\",");
+				sb.append(group.getKey());
+				sb.append("]");
+				isFirst = false;
+			}
+		}
+		sb.append("];\n\n");
+		sb.append("for(var index in groups){\n");
+		sb.append("  var body = document.body;\n");
+		sb.append("  var group = groups[index];\n");
+		sb.append("  body.innerHTML = body.innerHTML.replace(group[0],\"<a href='#' class='group-link' onclick='fx.selectGroup(\\\"\"+group[0]+\"\\\",\"+group[1]+\")'>\"+group[0]+\"</a>\");\n");
+		sb.append("}");
+		injectJS = sb.toString();
+	}
+
+	public class JSConnector {
+		public void selectGroup(String name, int key) {
+			for (Category cat : model.getVideo().getCategories()) {
+				for (Group group : cat.getGroups()) {
+					if (group.getKey() == key && group.getName().equals(name)) {
+						model.getActiveNode().setValue(group);
+						break;
+					}
+				}
+			}
+		}
 	}
 
 	private class PlayerTimeListener implements ChangeListener<Duration> {
