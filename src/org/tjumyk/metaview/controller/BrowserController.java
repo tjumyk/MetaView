@@ -276,6 +276,14 @@ public class BrowserController extends PanelControllerBase {
 						}
 					});
 		});
+		list_zoom_in.getSelectionModel().selectedItemProperty().addListener(new ChangeListener<Group>() {
+			@Override
+			public void changed(ObservableValue<? extends Group> observable,
+					Group oldValue, Group newValue) {
+				if(newValue != null)
+					model.getActiveNode().setValue(newValue);
+			}
+		});
 	}
 
 	private void showWebViewInfo(String info) {
@@ -485,6 +493,10 @@ public class BrowserController extends PanelControllerBase {
 					if (n == null)
 						return;
 					if (n instanceof Group) {
+						if(list_zoom_in.getItems().contains(n)){
+							list_zoom_in.getSelectionModel().select((Group)n);
+						}
+						
 						boolean find = false;
 						int catIndex = 0;
 						outer: for (Category cat : video.getCategories()) {

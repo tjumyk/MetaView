@@ -275,7 +275,7 @@
 	-fx-font-size: 12px;
 	-fx-text-fill: grey;
 }
-#list_zoom_in .cell:selected .zoom-in .desc{
+#list_zoom_in:focused .cell:selected .zoom-in .desc{
 	-fx-text-fill: whitesmoke;
 }
 #list_zoom_in{

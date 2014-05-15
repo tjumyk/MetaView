@@ -59,7 +59,11 @@ public class ZoomInListFactory implements
 						+ "] " + item.getName());
 				label_name.getStyleClass().add("name");
 				Tooltip.install(label_name, new Tooltip(item.getName()));
-				Document doc = Jsoup.parse(item.getInfo());
+				String info = item.getInfo();
+				if(info.startsWith("http://")||info.startsWith("https://")){
+					info = "";
+				}
+				Document doc = Jsoup.parse(info);
 				String text = doc.text();
 				Label label_desc = new Label(text);
 				label_desc.setWrapText(true);
