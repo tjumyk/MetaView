@@ -13,7 +13,7 @@ body{
   margin: 0 10px 10px 0;
   float:left;
 }
-.link{
+.ref-link{
   color:white;
   background-color: rgb(91, 192, 222);
   border-color: rgb(70, 184, 218);
@@ -21,4 +21,20 @@ body{
   border-radius: 4px;
   cursor: pointer;
   text-decoration:none;
+}
+.ref-link:hover, .ref-link:focus, .ref-link:active{
+  color: #fff;
+  background-color: #39b3d7;
+  border-color: #269abc;
+}
+.group-link:hover, .group-link:focus {
+  color: #2a6496;
+  text-decoration: underline;
+}
+.group-link:active, .group-link:hover {
+  outline: 0;
+}
+.group-link {
+  color: #428bca;
+  text-decoration: none;
 }

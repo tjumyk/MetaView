@@ -567,10 +567,15 @@ public class BrowserController extends PanelControllerBase {
 			}
 		}
 		sb.append("];\n\n");
+		sb.append("var paras = document.querySelectorAll('.auto-link');\n");
 		sb.append("for(var index in groups){\n");
-		sb.append("  var body = document.body;\n");
 		sb.append("  var group = groups[index];\n");
-		sb.append("  body.innerHTML = body.innerHTML.replace(group[0],\"<a href='#' class='group-link' onclick='fx.selectGroup(\\\"\"+group[0]+\"\\\",\"+group[1]+\")'>\"+group[0]+\"</a>\");\n");
+		sb.append("  for(var index2 in paras){\n");
+		sb.append("    var node = paras[index2];\n");
+		sb.append("    if(!node || !node.innerHTML)\n");
+		sb.append("      continue;\n");
+		sb.append("    node.innerHTML = node.innerHTML.replace(group[0],\"<a href='#' class='group-link' onclick='fx.selectGroup(\\\"\"+group[0]+\"\\\",\"+group[1]+\")'>\"+group[0]+\"</a>\");\n");
+		sb.append("  }\n");
 		sb.append("}");
 		injectJS = sb.toString();
 	}
@@ -585,6 +590,14 @@ public class BrowserController extends PanelControllerBase {
 					}
 				}
 			}
+		}
+
+		public void info(String info) {
+			System.out.println(info);
+		}
+
+		public void error(String info) {
+			System.err.println(info);
 		}
 	}
 
