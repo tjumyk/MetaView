@@ -281,3 +281,11 @@
 #list_zoom_in{
 	-fx-background-color:rgb(244,244,244);
 }
+
+/* styles for search result */
+#box_search_results{
+  -fx-background-color: rgba(244,244,244,0.5);
+}
+.search-result-item:hover{
+  -fx-background-color: rgba(224,224,224,0.5);
+}

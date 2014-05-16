@@ -44,6 +44,7 @@ import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.FlowPane;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
@@ -58,6 +59,7 @@ import javafx.stage.FileChooser.ExtensionFilter;
 import javafx.util.Duration;
 import netscape.javascript.JSObject;
 
+import org.apache.lucene.queryparser.classic.ParseException;
 import org.controlsfx.dialog.Dialogs;
 import org.tjumyk.metaview.Main;
 import org.tjumyk.metaview.cellfactory.ZoomInListFactory;
@@ -69,6 +71,7 @@ import org.tjumyk.metaview.model.Group;
 import org.tjumyk.metaview.model.MetaVideo;
 import org.tjumyk.metaview.model.MetaVideoParser;
 import org.tjumyk.metaview.model.Segment;
+import org.tjumyk.metaview.search.SearchEngine;
 import org.tjumyk.metaview.util.NodeStyleUtil;
 import org.tjumyk.metaview.viewmodel.LogicAction;
 import org.tjumyk.metaview.viewmodel.LogicUnit;
@@ -107,13 +110,13 @@ public class BrowserController extends PanelControllerBase {
 	VBox box_media_controls, box_search;
 
 	@FXML
-	FlowPane flow_search_results;
-
-	@FXML
 	ImageView img_play, img_pause, img_replay;
 
 	@FXML
 	TextField txt_search_key;
+
+	@FXML
+	HBox box_search_results;
 
 	private MetaVideo video;
 	private MediaPlayer player;
@@ -125,9 +128,9 @@ public class BrowserController extends PanelControllerBase {
 	private SegmentSelectListener segmentSelectListener = new SegmentSelectListener();
 	private NodeMouseEnterListener nodeMouseEnterListener = new NodeMouseEnterListener();
 	private NodeMouseExitListener nodeMouseExitListener = new NodeMouseExitListener();
+	private SearchItemClickHandler searchItemClickHandler = new SearchItemClickHandler();
 
 	private ZoomInListFactory zoomInListCellFactory = new ZoomInListFactory();
-
 	private String injectJS;
 	private JSConnector connector = new JSConnector();
 
@@ -192,6 +195,7 @@ public class BrowserController extends PanelControllerBase {
 	private void hideSearchBar() {
 		if (!box_search.isVisible())
 			return;
+		txt_search_key.setText("");
 		TranslateTransition tt = new TranslateTransition(Duration.seconds(0.3),
 				box_search);
 		tt.setFromY(0);
@@ -347,22 +351,48 @@ public class BrowserController extends PanelControllerBase {
 			@Override
 			public void changed(ObservableValue<? extends String> observable,
 					String oldValue, String newValue) {
-				if (newValue == null || newValue.length() <= 0)
+				if (newValue == null || newValue.length() <= 0) {
+					box_search_results.getChildren().clear();
 					return;
+				}
 				execSearch(newValue);
 			}
 		});
+
 	}
 
-	private void execSearch(String newValue) {
-		System.out.println("[Search] " + newValue);
+	private void execSearch(String query) {
+		try {
+			box_search_results.getChildren().clear();
+			List<Group> groups = SearchEngine.searchModel(model.getVideo(),
+					query);
+			for (Group item : groups) {
+				ImageView img = new ImageView(BrowserController.getInstance()
+						.getFrameImageMap().get(item.getKey()));
+				img.setFitWidth(56);
+				img.setPreserveRatio(true);
+				Label label_name = new Label(item.getName());
+				label_name.setMaxWidth(56);
+				label_name.getStyleClass().add("name");
+				Tooltip.install(label_name, new Tooltip(item.getName()));
+				VBox box = new VBox(5, img, label_name);
+				box.getStyleClass().add("search-result-item");
+				box.setPadding(new Insets(5, 5, 5, 5));
+				label_name.setAlignment(Pos.CENTER);
+				box.setUserData(item);
+				box.setOnMouseClicked(searchItemClickHandler);
+				box_search_results.getChildren().add(box);
+			}
+		} catch (IOException e) {
+			e.printStackTrace();
+		} catch (ParseException e) {
+			e.printStackTrace();
+		}
 	}
 
 	private void showWebViewInfo(String info) {
 		if (info == null)
 			webview_info.getEngine().loadContent("");
-		else if (info.startsWith("http://") || info.startsWith("https://"))
-			webview_info.getEngine().load(info);
 		else
 			webview_info.getEngine().loadContent(info);
 	}
@@ -428,6 +458,7 @@ public class BrowserController extends PanelControllerBase {
 			if (param.length() > 0) {
 				try {
 					video = MetaVideoParser.parse(new File(param));
+					initSearch();
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
@@ -446,6 +477,7 @@ public class BrowserController extends PanelControllerBase {
 		if (file != null && file.exists()) {
 			try {
 				video = MetaVideoParser.parse(file);
+				initSearch();
 				return true;
 			} catch (Exception e) {
 				Dialogs.create().title(Main.getString("error.title"))
@@ -455,6 +487,27 @@ public class BrowserController extends PanelControllerBase {
 			}
 		}
 		return false;
+	}
+
+	private void initSearch() throws IOException {
+		Task<Void> initTask = new Task<Void>() {
+
+			@Override
+			protected Void call() throws Exception {
+				SearchEngine.indexModel(video);
+				return null;
+			}
+		};
+		initTask.setOnFailed(e -> {
+			e.getSource().getException().printStackTrace();
+		});
+		initTask.setOnSucceeded(e -> {
+			txt_search_key.setPromptText(Main.getString("search.prompt"));
+			txt_search_key.setDisable(false);
+		});
+		txt_search_key.setPromptText(Main.getString("search.wait_init"));
+		txt_search_key.setDisable(true);
+		new Thread(initTask).start();
 	}
 
 	private void loadFrameImages() {
@@ -582,9 +635,9 @@ public class BrowserController extends PanelControllerBase {
 						}
 						if (!find)
 							return;
-						accordion_category_list
-								.setExpandedPane(accordion_category_list
-										.getPanes().get(catIndex));
+						TitledPane pane = accordion_category_list.getPanes()
+								.get(catIndex);
+						accordion_category_list.setExpandedPane(pane);
 						showGroupSegments((Group) n);
 					}
 				});
@@ -598,6 +651,8 @@ public class BrowserController extends PanelControllerBase {
 				model.getRelatedGroupsInPlayList());
 
 		buildInjectJS();
+
+		hideSearchBar();
 	}
 
 	private void buildInjectJS() {
@@ -770,6 +825,25 @@ public class BrowserController extends PanelControllerBase {
 			Node node = (Node) event.getSource();
 			if (model.getHoverNode().getValue() == node.getUserData())
 				model.getHoverNode().setValue(null);
+		}
+	}
+
+	public class SearchItemClickHandler implements EventHandler<MouseEvent> {
+		@Override
+		public void handle(MouseEvent event) {
+			Node node = (Node) event.getSource();
+			Group item = (Group) node.getUserData();
+
+			model.getActiveNode().setValue(item);
+			if (event.getClickCount() == 2) {
+				model.getSegmentPlayList().clear();
+				model.getPlayingSegment().setValue(null);
+				List<Segment> segList = item.getSegments();
+				if (segList.size() > 0) {
+					model.getSegmentPlayList().addAll(segList);
+					model.getPlayingSegment().setValue(segList.get(0));
+				}
+			}
 		}
 	}
 

@@ -18,5 +18,20 @@
 			<attribute name="javadoc_location" value="http://jsoup.org/apidocs/"/>
 		</attributes>
 	</classpathentry>
+	<classpathentry kind="lib" path="lib/lucene-core-4.8.0.jar">
+		<attributes>
+			<attribute name="javadoc_location" value="jar:file:/F:/SCS/Open%20Source/lucene/lucene-4.8.0.zip!/lucene-4.8.0/docs/core"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="lib" path="lib/lucene-analyzers-common-4.8.0.jar">
+		<attributes>
+			<attribute name="javadoc_location" value="jar:file:/F:/SCS/Open%20Source/lucene/lucene-4.8.0.zip!/lucene-4.8.0/docs/analyzers-common"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="lib" path="lib/lucene-queryparser-4.8.0.jar">
+		<attributes>
+			<attribute name="javadoc_location" value="jar:file:/F:/SCS/Open%20Source/lucene/lucene-4.8.0.zip!/lucene-4.8.0/docs/queryparser"/>
+		</attributes>
+	</classpathentry>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

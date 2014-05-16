@@ -83,7 +83,7 @@
 <Image url="@../images/dialog_close.png" />
 </image>
 </ImageView>
-</children></HBox><FlowPane fx:id="flow_search_results" />
+</children></HBox><HBox fx:id="box_search_results" />
 </children>
 </VBox>
 </children></AnchorPane><WebView fx:id="webview_info" layoutX="14.0" layoutY="-71.0" prefHeight="200.0" prefWidth="200.0" />
