@@ -61,19 +61,29 @@
   </rowConstraints>
 <children><Label text="%about.author" /><Label text="%app.author" GridPane.columnIndex="1" /><Label text="%about.advisor" GridPane.rowIndex="1" /><Label text="%app.advisor" GridPane.columnIndex="1" GridPane.rowIndex="1" /><Label text="%about.develop_time" GridPane.rowIndex="2" /><Label text="%app.develop_time" GridPane.columnIndex="1" GridPane.rowIndex="2" /><Label text="%about.contact" GridPane.rowIndex="3" GridPane.valignment="TOP" />
 <VBox spacing="10.0" GridPane.columnIndex="1" GridPane.rowIndex="3">
+<children><FlowPane hgap="10.0" prefWidth="80.0" vgap="10.0">
 <children>
 <ImageView onMouseClicked="#onContactByQQ" styleClass="image-btn" GridPane.columnIndex="1" GridPane.rowIndex="3">
 <image>
 <Image url="@../images/qq_talk.png" />
 </image>
-</ImageView><Button mnemonicParsing="false" onAction="#onContactByEmail" styleClass="email" text="%app.contact.email">
+</ImageView><Button mnemonicParsing="false" onAction="#onContactByGithub" styleClass="email" text="%app.contact.github">
 <graphic>
-<ImageView fitHeight="22.0" fitWidth="22.0">
+<ImageView fitHeight="18.0" fitWidth="18.0" preserveRatio="true">
+<image>
+<Image url="@../images/github-mini.png" />
+</image>
+</ImageView>
+</graphic>
+</Button><Button mnemonicParsing="false" onAction="#onContactByEmail" styleClass="email" text="%app.contact.email">
+<graphic>
+<ImageView fitHeight="18.0" fitWidth="18.0" preserveRatio="true">
 <image>
 <Image url="@../images/email.png" />
 </image>
 </ImageView>
 </graphic></Button>
+</children></FlowPane>
 </children>
 </VBox>
 </children>
@@ -90,7 +100,7 @@
 <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
 </padding>
 </HBox><HBox alignment="CENTER_RIGHT" prefHeight="100.0" prefWidth="200.0" spacing="5.0" GridPane.columnIndex="1">
-<children><Button mnemonicParsing="false" onAction="#onCloseAction" text="%dialog.close" />
+<children><Button cancelButton="true" defaultButton="true" mnemonicParsing="false" onAction="#onCloseAction" text="%dialog.close" />
 </children>
 <padding>
 <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />

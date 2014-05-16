@@ -41,7 +41,7 @@
     <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="100.0" prefWidth="160.0">
 <children>
 <StackPane fx:id="stack_media_view" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-<children><MediaView fx:id="media_view" layoutX="149.0" layoutY="124.0" preserveRatio="true" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" /><VBox fx:id="box_controls" alignment="CENTER" onMouseEntered="#onMouseEnterVideo" onMouseExited="#onMouseExitVideo" opacity="0.0">
+<children><MediaView fx:id="media_view" layoutX="149.0" layoutY="124.0" preserveRatio="true" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" /><VBox fx:id="box_media_controls" alignment="CENTER" onMouseEntered="#onMouseEnterVideo" onMouseExited="#onMouseExitVideo" opacity="0.0">
 <children>
 <HBox alignment="CENTER" prefHeight="64.0" prefWidth="200.0" spacing="50.0" StackPane.alignment="CENTER">
 <children>
@@ -70,6 +70,22 @@
 </VBox>
 </children>
 </StackPane>
+<VBox fx:id="box_search" visible="false" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+<children><HBox styleClass="header-label" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+<children>
+<ImageView fitHeight="24.0" fitWidth="24.0" preserveRatio="true">
+<image>
+<Image url="@../images/search-mini.png" />
+</image>
+</ImageView><TextField fx:id="txt_search_key" maxWidth="1.7976931348623157E308" prefWidth="1000.0" promptText="%search.prompt" />
+<ImageView onMouseClicked="#onCloseSearch" styleClass="image-btn">
+<image>
+<Image url="@../images/dialog_close.png" />
+</image>
+</ImageView>
+</children></HBox><FlowPane fx:id="flow_search_results" />
+</children>
+</VBox>
 </children></AnchorPane><WebView fx:id="webview_info" layoutX="14.0" layoutY="-71.0" prefHeight="200.0" prefWidth="200.0" />
   </items>
 </SplitPane><SplitPane dividerPositions="0.21428571428571427, 0.6768707482993197" focusTraversable="true" layoutX="-20.0" layoutY="80.0" orientation="VERTICAL" prefHeight="200.0" prefWidth="160.0">

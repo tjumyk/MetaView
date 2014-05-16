@@ -53,6 +53,19 @@ public class DialogAboutController extends DialogControllerBase {
 	}
 
 	@FXML
+	private void onContactByGithub(ActionEvent event) {
+		Desktop desktop = Desktop.getDesktop();
+		try {
+			desktop.browse(new URI(Main.getString("app.contact.github")
+					.replace("@", "https://github.com/")));
+		} catch (IOException e) {
+			e.printStackTrace();
+		} catch (URISyntaxException e) {
+			e.printStackTrace();
+		}
+	}
+
+	@FXML
 	private void onContactByEmail(ActionEvent event) {
 		Desktop desktop = Desktop.getDesktop();
 		try {

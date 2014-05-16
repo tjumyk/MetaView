@@ -12,6 +12,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 import javafx.animation.FadeTransition;
+import javafx.animation.TranslateTransition;
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.Property;
@@ -32,6 +33,7 @@ import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.ScrollPane;
+import javafx.scene.control.TextField;
 import javafx.scene.control.TitledPane;
 import javafx.scene.control.Tooltip;
 import javafx.scene.image.Image;
@@ -102,10 +104,16 @@ public class BrowserController extends PanelControllerBase {
 	ListView<Group> list_zoom_in;
 
 	@FXML
-	VBox box_controls;
+	VBox box_media_controls, box_search;
+
+	@FXML
+	FlowPane flow_search_results;
 
 	@FXML
 	ImageView img_play, img_pause, img_replay;
+
+	@FXML
+	TextField txt_search_key;
 
 	private MetaVideo video;
 	private MediaPlayer player;
@@ -154,6 +162,9 @@ public class BrowserController extends PanelControllerBase {
 				if (openNewFile())
 					loadFrameImages();
 				break;
+			case "search":
+				showSearchBar();
+				break;
 			case "about":
 				Main.openDialog("dialog_about.fxml", null);
 				break;
@@ -165,6 +176,30 @@ public class BrowserController extends PanelControllerBase {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+	}
+
+	private void showSearchBar() {
+		if (box_search.isVisible())
+			return;
+		TranslateTransition tt = new TranslateTransition(Duration.seconds(0.3),
+				box_search);
+		tt.setFromY(-1 * box_search.getHeight());
+		tt.setToY(0);
+		tt.play();
+		box_search.setVisible(true);
+	}
+
+	private void hideSearchBar() {
+		if (!box_search.isVisible())
+			return;
+		TranslateTransition tt = new TranslateTransition(Duration.seconds(0.3),
+				box_search);
+		tt.setFromY(0);
+		tt.setToY(-1 * box_search.getHeight());
+		tt.setOnFinished(e -> {
+			box_search.setVisible(false);
+		});
+		tt.play();
 	}
 
 	public Map<Integer, Image> getFrameImageMap() {
@@ -307,6 +342,20 @@ public class BrowserController extends PanelControllerBase {
 							model.getActiveNode().setValue(newValue);
 					}
 				});
+
+		txt_search_key.textProperty().addListener(new ChangeListener<String>() {
+			@Override
+			public void changed(ObservableValue<? extends String> observable,
+					String oldValue, String newValue) {
+				if (newValue == null || newValue.length() <= 0)
+					return;
+				execSearch(newValue);
+			}
+		});
+	}
+
+	private void execSearch(String newValue) {
+		System.out.println("[Search] " + newValue);
 	}
 
 	private void showWebViewInfo(String info) {
@@ -670,7 +719,7 @@ public class BrowserController extends PanelControllerBase {
 		if (controlTransition != null)
 			controlTransition.stop();
 		controlTransition = new FadeTransition(Duration.seconds(1.0),
-				box_controls);
+				box_media_controls);
 		controlTransition.setToValue(1);
 		controlTransition.play();
 	}
@@ -680,9 +729,14 @@ public class BrowserController extends PanelControllerBase {
 		if (controlTransition != null)
 			controlTransition.stop();
 		controlTransition = new FadeTransition(Duration.seconds(1.0),
-				box_controls);
+				box_media_controls);
 		controlTransition.setToValue(0);
 		controlTransition.play();
+	}
+
+	@FXML
+	private void onCloseSearch(MouseEvent event) {
+		hideSearchBar();
 	}
 
 	private void selectAndPlay(Segment seg) {
