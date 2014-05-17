@@ -77,7 +77,7 @@
 <image>
 <Image url="@../images/search-mini.png" />
 </image>
-</ImageView><TextField fx:id="txt_search_key" maxWidth="1.7976931348623157E308" prefWidth="1000.0" promptText="%search.prompt" />
+</ImageView><TextField fx:id="txt_search_key" disable="true" maxWidth="1.7976931348623157E308" prefWidth="1000.0" />
 <ImageView onMouseClicked="#onCloseSearch" styleClass="image-btn">
 <image>
 <Image url="@../images/dialog_close.png" />

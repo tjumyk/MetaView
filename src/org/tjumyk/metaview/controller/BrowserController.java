@@ -38,10 +38,14 @@ import javafx.scene.control.TitledPane;
 import javafx.scene.control.Tooltip;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.input.DataFormat;
+import javafx.scene.input.DragEvent;
+import javafx.scene.input.Dragboard;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
+import javafx.scene.input.TransferMode;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.HBox;
@@ -156,8 +160,38 @@ public class BrowserController extends PanelControllerBase {
 		instance = this;
 		initKeyBinding();
 		initUI();
-		parseParam();
-		startLoad();
+		initDragIn();
+		Platform.runLater(() -> {
+			parseParam();
+		});
+	}
+
+	private void initDragIn() {
+		root.addEventHandler(
+				DragEvent.ANY,
+				event -> {
+					if (event.getEventType() == DragEvent.DRAG_OVER) {
+						if (event.getGestureSource() != root
+								&& event.getDragboard().hasContent(
+										DataFormat.FILES)) {
+							event.acceptTransferModes(TransferMode.MOVE);
+						}
+						event.consume();
+					} else if (event.getEventType() == DragEvent.DRAG_DROPPED) {
+						Dragboard db = event.getDragboard();
+						boolean success = false;
+						if (db.hasContent(DataFormat.FILES)) {
+							List<?> fileList = (List<?>) db
+									.getContent(DataFormat.FILES);
+							if (fileList.size() > 0) {
+								openNewFile((File) fileList.get(0));
+								success = true;
+							}
+						}
+						event.setDropCompleted(success);
+						event.consume();
+					}
+				});
 	}
 
 	@Override
@@ -165,15 +199,13 @@ public class BrowserController extends PanelControllerBase {
 		try {
 			switch (id) {
 			case "open":
-				if (openNewFile())
-					loadFrameImages();
+				openNewFile();
 				break;
 			case "search":
 				showSearchBar();
 				break;
 			case "import":
-				if(importOldMeta())
-					loadFrameImages();
+				importOldMeta();
 				break;
 			case "about":
 				Main.openDialog("dialog_about.fxml", null);
@@ -188,30 +220,20 @@ public class BrowserController extends PanelControllerBase {
 		}
 	}
 
-	private boolean importOldMeta() {
+	private void importOldMeta() {
 		FileChooser chooser = new FileChooser();
 		chooser.setTitle(Main.getString("filechooser.import_old_metavideo"));
-		chooser.setInitialDirectory(new File(System.getProperty("user.dir")));
 		File file = chooser.showOpenDialog(Main.getStage());
 
 		if (file != null && file.exists()) {
-			MetaVideo video = null;
 			try {
-				video = OldMetaImporter.parseOldMeta(file);
-			} catch (Exception e) {
-				Dialogs.create().title(Main.getString("error.title"))
-						.masthead(Main.getString("error.parse_error"))
-						.showException(e);
-				e.printStackTrace();
-				return false;
-			}
-			try {
+				MetaVideo video = OldMetaImporter.parseOldMeta(file);
 				File newFile = new File(FilenameUtils.removeExtension(file
 						.getAbsolutePath()) + ".mvd");
 				MetaVideoWriter.writeToFile(video, newFile);
 				this.video = video;
 				initSearch();
-				return true;
+				loadFrameImages();
 			} catch (Exception e) {
 				Dialogs.create().title(Main.getString("error.title"))
 						.masthead(Main.getString("error.transform_error"))
@@ -219,7 +241,6 @@ public class BrowserController extends PanelControllerBase {
 				e.printStackTrace();
 			}
 		}
-		return false;
 	}
 
 	private void showSearchBar() {
@@ -478,48 +499,32 @@ public class BrowserController extends PanelControllerBase {
 		// TODO show video in full screen
 	}
 
-	private void startLoad() {
-		Platform.runLater(new Runnable() {
-
-			@Override
-			public void run() {
-				if (video == null) {
-					if (openNewFile())
-						loadFrameImages();
-				} else
-					loadFrameImages();
-			}
-		});
-	}
-
 	private void parseParam() {
 		List<String> params = Main.getParams().getUnnamed();
 		if (params.size() > 0) {
 			String param = params.get(0);
 			if (param.length() > 0) {
-				try {
-					video = MetaVideoParser.parse(new File(param));
-					initSearch();
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
+				openNewFile(new File(param));
 			}
 		}
 	}
 
-	private boolean openNewFile() {
+	private void openNewFile() {
 		FileChooser chooser = new FileChooser();
 		chooser.setTitle(Main.getString("filechooser.choose_metavideo"));
 		chooser.getExtensionFilters().add(
 				new ExtensionFilter("MetaVideo Description File", "*.mvd"));
-		chooser.setInitialDirectory(new File(System.getProperty("user.dir")));
 		File file = chooser.showOpenDialog(Main.getStage());
 
+		openNewFile(file);
+	}
+
+	private void openNewFile(File file) {
 		if (file != null && file.exists()) {
 			try {
 				video = MetaVideoParser.parse(file);
 				initSearch();
-				return true;
+				loadFrameImages();
 			} catch (Exception e) {
 				Dialogs.create().title(Main.getString("error.title"))
 						.masthead(Main.getString("error.parse_error"))
@@ -527,7 +532,6 @@ public class BrowserController extends PanelControllerBase {
 				e.printStackTrace();
 			}
 		}
-		return false;
 	}
 
 	private void initSearch() throws IOException {
@@ -693,7 +697,7 @@ public class BrowserController extends PanelControllerBase {
 
 		buildInjectJS();
 
-		hideSearchBar();
+		txt_search_key.setText("");
 	}
 
 	private void buildInjectJS() {
@@ -786,6 +790,8 @@ public class BrowserController extends PanelControllerBase {
 
 	@FXML
 	private void onPlay() {
+		if (model == null || player == null)
+			return;
 		Segment playingSegment = model.getPlayingSegment().getValue();
 		if (playingSegment == null) {
 			if (model.getSegmentPlayList().size() <= 0)
@@ -798,11 +804,15 @@ public class BrowserController extends PanelControllerBase {
 
 	@FXML
 	private void onPause() {
+		if (model == null || player == null)
+			return;
 		player.pause();
 	}
 
 	@FXML
 	private void onReplay() {
+		if (model == null || player == null)
+			return;
 		if (model.getSegmentPlayList().size() <= 0) {
 			return;
 		}
