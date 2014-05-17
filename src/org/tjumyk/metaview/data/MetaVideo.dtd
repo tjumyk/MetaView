@@ -4,9 +4,7 @@
 <!ATTLIST MetaVideo total_frames NMTOKEN #REQUIRED >
 <!ATTLIST MetaVideo version NMTOKEN #REQUIRED >
 <!ATTLIST MetaVideo fps NMTOKEN #REQUIRED >
-<!ATTLIST MetaVideo width NMTOKEN #REQUIRED >
-<!ATTLIST MetaVideo height NMTOKEN #REQUIRED >
-<!ATTLIST MetaVideo frame_image_folder CDATA #IMPLIED >
+<!ATTLIST MetaVideo frame_image_folder CDATA #REQUIRED >
 
 <!ELEMENT segments ( segment+ ) >
 

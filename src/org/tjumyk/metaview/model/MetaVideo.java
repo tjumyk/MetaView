@@ -5,23 +5,7 @@ import java.util.List;
 
 public class MetaVideo {
 	private String version, name, movieFile,frameImageFolder;
-	private int totalFrames,fps,width,height;
-
-	public int getWidth() {
-		return width;
-	}
-
-	public void setWidth(int width) {
-		this.width = width;
-	}
-
-	public int getHeight() {
-		return height;
-	}
-
-	public void setHeight(int height) {
-		this.height = height;
-	}
+	private int totalFrames,fps;
 
 	public int getFps() {
 		return fps;

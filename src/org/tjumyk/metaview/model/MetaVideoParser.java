@@ -24,8 +24,6 @@ public class MetaVideoParser {
 		video.setName(root.getAttribute("name"));
 		video.setTotalFrames(Integer.parseInt(root.getAttribute("total_frames")));
 		video.setFps(Integer.parseInt(root.getAttribute("fps")));
-		video.setWidth(Integer.parseInt(root.getAttribute("width")));
-		video.setHeight(Integer.parseInt(root.getAttribute("height")));
 
 		video.setMovieFile(parsePath(file, root.getAttribute("movie_file"),
 				true));
@@ -83,10 +81,12 @@ public class MetaVideoParser {
 		return video;
 	}
 
-	private static String parsePath(File baseFile, String path, boolean isFile)
+	public static String parsePath(File baseFile, String path, boolean isFile)
 			throws MalformedURLException {
+		if (path.length() <= 0)
+			return null;
 		if (path.startsWith("http://") || path.startsWith("ftp://")
-				|| path.startsWith("https://")) {
+				|| path.startsWith("https://") || path.startsWith("file:/")) {
 			return path;
 		} else {
 			File file = new File(path);

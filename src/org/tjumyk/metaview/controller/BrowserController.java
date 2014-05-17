@@ -59,6 +59,7 @@ import javafx.stage.FileChooser.ExtensionFilter;
 import javafx.util.Duration;
 import netscape.javascript.JSObject;
 
+import org.apache.commons.io.FilenameUtils;
 import org.apache.lucene.queryparser.classic.ParseException;
 import org.controlsfx.dialog.Dialogs;
 import org.tjumyk.metaview.Main;
@@ -70,6 +71,8 @@ import org.tjumyk.metaview.model.Category;
 import org.tjumyk.metaview.model.Group;
 import org.tjumyk.metaview.model.MetaVideo;
 import org.tjumyk.metaview.model.MetaVideoParser;
+import org.tjumyk.metaview.model.MetaVideoWriter;
+import org.tjumyk.metaview.model.OldMetaImporter;
 import org.tjumyk.metaview.model.Segment;
 import org.tjumyk.metaview.search.SearchEngine;
 import org.tjumyk.metaview.util.NodeStyleUtil;
@@ -168,6 +171,10 @@ public class BrowserController extends PanelControllerBase {
 			case "search":
 				showSearchBar();
 				break;
+			case "import":
+				if(importOldMeta())
+					loadFrameImages();
+				break;
 			case "about":
 				Main.openDialog("dialog_about.fxml", null);
 				break;
@@ -179,6 +186,40 @@ public class BrowserController extends PanelControllerBase {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+	}
+
+	private boolean importOldMeta() {
+		FileChooser chooser = new FileChooser();
+		chooser.setTitle(Main.getString("filechooser.import_old_metavideo"));
+		chooser.setInitialDirectory(new File(System.getProperty("user.dir")));
+		File file = chooser.showOpenDialog(Main.getStage());
+
+		if (file != null && file.exists()) {
+			MetaVideo video = null;
+			try {
+				video = OldMetaImporter.parseOldMeta(file);
+			} catch (Exception e) {
+				Dialogs.create().title(Main.getString("error.title"))
+						.masthead(Main.getString("error.parse_error"))
+						.showException(e);
+				e.printStackTrace();
+				return false;
+			}
+			try {
+				File newFile = new File(FilenameUtils.removeExtension(file
+						.getAbsolutePath()) + ".mvd");
+				MetaVideoWriter.writeToFile(video, newFile);
+				this.video = video;
+				initSearch();
+				return true;
+			} catch (Exception e) {
+				Dialogs.create().title(Main.getString("error.title"))
+						.masthead(Main.getString("error.transform_error"))
+						.showException(e);
+				e.printStackTrace();
+			}
+		}
+		return false;
 	}
 
 	private void showSearchBar() {
@@ -952,9 +993,11 @@ public class BrowserController extends PanelControllerBase {
 					updateProgress(count, size);
 				}
 			} else {
-				updateMessage(Main.getString("media.loading_from_local_folder"));
 				String folder = video.getFrameImageFolder();
 				if (folder != null && folder.length() > 0) {
+					updateMessage(Main
+							.getString("media.loading_from_local_folder"));
+
 					int loaded = 0;
 					for (Segment segment : video.getSegments()) {
 						int key = segment.getKey();
