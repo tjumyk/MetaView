@@ -207,6 +207,9 @@ public class BrowserController extends PanelControllerBase {
 			case "import":
 				importOldMeta();
 				break;
+			case "help":
+				Main.openDialog("dialog_help.fxml", null);
+				break;
 			case "about":
 				Main.openDialog("dialog_about.fxml", null);
 				break;

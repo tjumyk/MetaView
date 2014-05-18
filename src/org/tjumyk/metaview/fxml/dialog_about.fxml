@@ -19,7 +19,7 @@
 <rowConstraints>
 <RowConstraints minHeight="10.0" vgrow="SOMETIMES" />
 </rowConstraints>
-<children><Label text="%about.title" />
+<children><Label text="%nav.about" />
 <ImageView onMouseClicked="#onClose" styleClass="image-btn" GridPane.columnIndex="1">
 <image>
 <Image url="@../images/dialog_close.png" />
