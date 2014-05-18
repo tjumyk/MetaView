@@ -19,9 +19,19 @@ import org.jsoup.nodes.Document;
 import org.tjumyk.metaview.controller.BrowserController;
 import org.tjumyk.metaview.model.Group;
 
+/**
+ * List cell factory for ListView of "ZoomIn View"
+ * 
+ * @author 宇锴
+ */
 public class ZoomInListFactory implements
 		Callback<ListView<Group>, ListCell<Group>> {
 
+	/**
+	 * List cell for items in "ZoomIn View"
+	 * 
+	 * @author 宇锴
+	 */
 	public class ZoomInListCell extends ListCell<Group> {
 
 		@Override
@@ -60,7 +70,7 @@ public class ZoomInListFactory implements
 				label_name.getStyleClass().add("name");
 				Tooltip.install(label_name, new Tooltip(item.getName()));
 				String info = item.getInfo();
-				if(info.startsWith("http://")||info.startsWith("https://")){
+				if (info.startsWith("http://") || info.startsWith("https://")) {
 					info = "";
 				}
 				Document doc = Jsoup.parse(info);
@@ -80,5 +90,4 @@ public class ZoomInListFactory implements
 	public ListCell<Group> call(ListView<Group> param) {
 		return new ZoomInListCell();
 	}
-
 }

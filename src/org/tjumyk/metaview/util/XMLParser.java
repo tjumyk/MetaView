@@ -92,7 +92,7 @@ public class XMLParser {
 		}
 		return null;
 	}
-	
+
 	public static List<Element> getDirectChildElementsByName(Element element,
 			String name) {
 		List<Element> list = new ArrayList<Element>();

@@ -4,8 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class MetaVideo {
-	private String version, name, movieFile,frameImageFolder;
-	private int totalFrames,fps;
+	private String version, name, movieFile, frameImageFolder;
+	private int totalFrames, fps;
 
 	public int getFps() {
 		return fps;

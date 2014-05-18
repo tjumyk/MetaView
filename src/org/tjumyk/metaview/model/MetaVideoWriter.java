@@ -34,18 +34,18 @@ public class MetaVideoWriter {
 				Integer.toString(video.getTotalFrames()));
 		String baseUrl = file.getParentFile().toURI().toURL().toExternalForm();
 		String movieFileUrl = video.getMovieFile();
-		if(movieFileUrl.startsWith(baseUrl)){
+		if (movieFileUrl.startsWith(baseUrl)) {
 			movieFileUrl = movieFileUrl.substring(baseUrl.length());
 		}
 		root.setAttribute("movie_file", movieFileUrl);
 
-		if (video.getFrameImageFolder() != null){
+		if (video.getFrameImageFolder() != null) {
 			String imgFolderUrl = video.getFrameImageFolder();
-			if(imgFolderUrl.startsWith(baseUrl)){
+			if (imgFolderUrl.startsWith(baseUrl)) {
 				imgFolderUrl = imgFolderUrl.substring(baseUrl.length());
 			}
 			root.setAttribute("frame_image_folder", imgFolderUrl);
-		}else
+		} else
 			root.setAttribute("frame_image_folder", "");
 		root.setAttribute("fps", Integer.toString(video.getFps()));
 		document.appendChild(root);

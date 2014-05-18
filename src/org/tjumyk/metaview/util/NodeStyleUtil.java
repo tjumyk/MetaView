@@ -64,15 +64,15 @@ public class NodeStyleUtil {
 				for (Line line : lineMap.get(o))
 					line.getStyleClass().remove(className);
 		}
-//		if (o instanceof Group) {
-//			Group group = (Group) o;
-//			for (Segment seg : group.getSegments()) {
-//				if (add)
-//					nodeMap.get(seg).getStyleClass().add(className);
-//				else
-//					nodeMap.get(seg).getStyleClass().remove(className);
-//			}
-//		}
+		// if (o instanceof Group) {
+		// Group group = (Group) o;
+		// for (Segment seg : group.getSegments()) {
+		// if (add)
+		// nodeMap.get(seg).getStyleClass().add(className);
+		// else
+		// nodeMap.get(seg).getStyleClass().remove(className);
+		// }
+		// }
 	}
 
 	public static void bindBlockListStyle(PlayerModel model,

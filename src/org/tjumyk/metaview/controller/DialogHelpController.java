@@ -29,12 +29,12 @@ public class DialogHelpController extends DialogControllerBase {
 	@Override
 	public void initialize(URL location, ResourceBundle resources) {
 		for (int i = 1; i <= IMAGE_TOTAL; i++) {
-			imgList.add(new ImageView(new Image(Main.class.getResourceAsStream("images/"
-					+ IMAGE_PATH + i + ".png"))));
+			imgList.add(new ImageView(new Image(Main.class
+					.getResourceAsStream("images/" + IMAGE_PATH + i + ".png"))));
 		}
 		pagination_help_image.setPageCount(IMAGE_TOTAL);
 		pagination_help_image.setMaxPageIndicatorCount(IMAGE_TOTAL);
-		pagination_help_image.setPageFactory(i->{
+		pagination_help_image.setPageFactory(i -> {
 			return imgList.get(i);
 		});
 		super.showDialog(root);

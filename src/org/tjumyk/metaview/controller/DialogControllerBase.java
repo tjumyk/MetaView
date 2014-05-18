@@ -23,7 +23,7 @@ public abstract class DialogControllerBase implements Initializable {
 	 *            传入的数据
 	 */
 	public abstract void initData(Object data);
-	
+
 	/**
 	 * 显示对话框，带有动画
 	 * 

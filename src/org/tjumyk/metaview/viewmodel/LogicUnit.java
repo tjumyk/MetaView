@@ -1,6 +1,5 @@
 package org.tjumyk.metaview.viewmodel;
 
-
 public class LogicUnit {
 	private Object object;
 	private LogicAction action;

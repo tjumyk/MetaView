@@ -73,7 +73,7 @@ public class DialogLoadController extends DialogControllerBase {
 		} else
 			super.closeDialog(root);
 	}
-	
+
 	@FXML
 	void onCancel(MouseEvent event) {
 		if (task != null && task.isRunning()) {

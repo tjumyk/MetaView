@@ -28,12 +28,13 @@ public class OldMetaImporter {
 			if (line.equals("TOTALFRAMES")) {
 				video.setTotalFrames(Integer.parseInt(lines[++i]));
 			} else if (line.equals("MOVIEPATH")) {
-				String path =escapeQuotes(lines[++i]);
+				String path = escapeQuotes(lines[++i]);
 				String file = MetaVideoParser.parsePath(metaFile, path, true);
 				video.setMovieFile(file);
 			} else if (line.equals("KEYFRAMEFOLDER")) {
 				String path = escapeQuotes(lines[++i]);
-				String folder = MetaVideoParser.parsePath(metaFile, path, false);
+				String folder = MetaVideoParser
+						.parsePath(metaFile, path, false);
 				video.setFrameImageFolder(folder);
 			} else if (line.equals("HEADERFILE")) {
 				++i;// ignored

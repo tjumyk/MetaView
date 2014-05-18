@@ -11,7 +11,7 @@ import org.junit.runners.Suite.SuiteClasses;
  *
  */
 @RunWith(Suite.class)
-@SuiteClasses({ TestParseXML.class, TestImportOldMeta.class, TestWriteXML.class})
+@SuiteClasses({ TestParseXML.class, TestImportOldMeta.class, TestWriteXML.class })
 public class AllTests {
 
 }

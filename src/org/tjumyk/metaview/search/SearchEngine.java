@@ -31,11 +31,28 @@ import org.tjumyk.metaview.model.Category;
 import org.tjumyk.metaview.model.Group;
 import org.tjumyk.metaview.model.MetaVideo;
 
+/**
+ * Full-text search engine using Apache Lucene
+ * 
+ * @author 宇锴
+ */
 public class SearchEngine {
-	private static final String INDEX_DIR = Main.TEMP_DIR + "index";
+	/**
+	 * Base path of the index folder used by Lucene
+	 */
+	private static final String INDEX_DIR_BASE = Main.TEMP_DIR + "index";
 
+	/**
+	 * Build indexes for {@link MetaVideo} model object
+	 * 
+	 * @param video
+	 *            meta video model object
+	 * @throws IOException
+	 *             if IO error
+	 */
 	public static void indexModel(MetaVideo video) throws IOException {
-		File indexDir = new File(INDEX_DIR);
+		File indexDir = new File(INDEX_DIR_BASE
+				+ video.getMovieFile().hashCode());
 		if (!indexDir.exists())
 			indexDir.mkdirs();
 
@@ -61,10 +78,25 @@ public class SearchEngine {
 		writer.close();
 	}
 
+	/**
+	 * Do a full-text search with the given key on the given model.
+	 * {@link #indexModel(MetaVideo)} must be called with this model before
+	 * doing any search on it.
+	 * 
+	 * @param video
+	 *            meta video model object
+	 * @param key
+	 *            search key
+	 * @return search results (list of related {@link Group}s)
+	 * @throws IOException
+	 *             if IO error
+	 * @throws ParseException
+	 *             if parse error
+	 */
 	public static List<Group> searchModel(MetaVideo video, String key)
 			throws IOException, ParseException {
 		IndexReader reader = DirectoryReader.open(FSDirectory.open(new File(
-				INDEX_DIR)));
+				INDEX_DIR_BASE + video.getMovieFile().hashCode())));
 		IndexSearcher searcher = new IndexSearcher(reader);
 		Analyzer analyzer = new StandardAnalyzer(Version.LUCENE_48);
 		QueryParser parser = new QueryParser(Version.LUCENE_48, "info",

@@ -16,11 +16,13 @@ public class TestParseXML {
 		try {
 			MetaVideo video = MetaVideoParser.parse(new File("sample/som.mvd"));
 			assertTrue(video != null);
-			
-			MetaVideo video2 = MetaVideoParser.parse(new File("sample/som-local-image.mvd"));
+
+			MetaVideo video2 = MetaVideoParser.parse(new File(
+					"sample/som-local-image.mvd"));
 			assertTrue(video2 != null);
-			
-			MetaVideo video3 = MetaVideoParser.parse(new File("sample/som-online.mvd"));
+
+			MetaVideo video3 = MetaVideoParser.parse(new File(
+					"sample/som-online.mvd"));
 			assertTrue(video3 != null);
 		} catch (Exception e) {
 			e.printStackTrace();

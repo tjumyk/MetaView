@@ -121,32 +121,31 @@ public class BlockSequencePane extends GridPane {
 			}
 		});
 	}
-	
-	private class BlockClickHandler implements EventHandler<MouseEvent>{
+
+	private class BlockClickHandler implements EventHandler<MouseEvent> {
 		public void handle(MouseEvent event) {
-			if(event.getClickCount() == 2){
-			Node node = (Node) event.getSource();
-			ObservableList<String> styles = node.getStyleClass();
-			if (styles.contains("in-playlist")) {
-				Segment target = null;
-				for (Segment seg : model.getSegmentPlayList()) {
-					if (nodeListMap.get(seg).contains(node)) {
-						target = seg;
-						break;
+			if (event.getClickCount() == 2) {
+				Node node = (Node) event.getSource();
+				ObservableList<String> styles = node.getStyleClass();
+				if (styles.contains("in-playlist")) {
+					Segment target = null;
+					for (Segment seg : model.getSegmentPlayList()) {
+						if (nodeListMap.get(seg).contains(node)) {
+							target = seg;
+							break;
+						}
+					}
+					if (target != null) {
+						model.getPlayingSegment().setValue(target);
+						int blockIndex = blocks.indexOf(node);
+						double from = blockIndex * framePerBlock + 1;
+						if (from < target.getFrom())
+							from = target.getFrom();
+						model.getSeekTime().setValue(
+								Duration.seconds(from
+										/ model.getVideo().getFps()));
 					}
 				}
-				if (target != null) {
-					model.getPlayingSegment().setValue(target);
-					int blockIndex = blocks.indexOf(node);
-					double from = blockIndex * framePerBlock + 1;
-					if (from < target.getFrom())
-						from = target.getFrom();
-					model.getSeekTime()
-							.setValue(
-									Duration.seconds(from
-											/ model.getVideo().getFps()));
-				}
-			}
 			}
 		};
 	}

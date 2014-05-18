@@ -15,9 +15,30 @@ import org.apache.http.client.fluent.Request;
 import org.tjumyk.metaview.Main;
 import org.tjumyk.metaview.data.DataLoader;
 
-public class VideoFrameCapture {
+/**
+ * Tool for extracting frame images from video, server, or local folder.
+ * 
+ * @author 宇锴
+ */
+public class VideoFrameFactory {
+	/**
+	 * The File object of "ffmpeg.exe"
+	 */
 	private static File ffmpeg;
 
+	/**
+	 * Get frame image from the cache folder
+	 * 
+	 * @param video
+	 *            video URL
+	 * @param second
+	 *            frame time in seconds
+	 * @param height
+	 *            fit height of the frame image
+	 * @return Image object
+	 * @throws IOException
+	 *             if IO error
+	 */
 	public static Image getCache(String video, double second, int height)
 			throws IOException {
 		File tmp = new File(Main.TEMP_DIR + video.hashCode() + "_" + second
@@ -28,6 +49,22 @@ public class VideoFrameCapture {
 		return img;
 	}
 
+	/**
+	 * Get frame image from local folder, image file is loaded in the cache
+	 * folder for reusing.
+	 * 
+	 * @param video
+	 *            video URL
+	 * @param folder
+	 *            local folder of frame images
+	 * @param second
+	 *            frame time in seconds
+	 * @param height
+	 *            fit height of the frame image
+	 * @return Image object
+	 * @throws IOException
+	 *             if IO error
+	 */
 	public static Image getFromFolder(String video, String folder,
 			double second, int height) throws IOException {
 		if (!folder.startsWith("file:/"))
@@ -41,6 +78,22 @@ public class VideoFrameCapture {
 		return img;
 	}
 
+	/**
+	 * Get frame image from remote server, image file is loaded in the cache
+	 * folder for reusing.
+	 * 
+	 * @param video
+	 *            video URL
+	 * @param serverBaseUrl
+	 *            base URL of frame image folder on the remote server
+	 * @param second
+	 *            frame time in seconds
+	 * @param height
+	 *            fit height of the frame image
+	 * @return Image object
+	 * @throws IOException
+	 *             if IO error
+	 */
 	public static Image getFromServer(String video, String serverBaseUrl,
 			double second, int height) throws IOException {
 		File tmp = new File(Main.TEMP_DIR + video.hashCode() + "_" + second
@@ -52,9 +105,26 @@ public class VideoFrameCapture {
 		return img;
 	}
 
-	public static Image capture(String video, double second, int height)
-			throws IOException, InterruptedException,
-			VideoFrameCaptureException {
+	/**
+	 * Get frame image from video file, image file is loaded in the cache folder
+	 * for reusing.
+	 * 
+	 * @param video
+	 *            video URL
+	 * @param second
+	 *            frame time in seconds
+	 * @param height
+	 *            fit height of the frame image
+	 * @return Image object
+	 * @throws IOException
+	 *             if IO error
+	 * @throws InterruptedException
+	 *             if thread interrupted
+	 * @throws FFMpegException
+	 *             if FFMpeg reports error
+	 */
+	public static Image getFromVideo(String video, double second, int height)
+			throws IOException, InterruptedException, FFMpegException {
 		if (!video.startsWith("file:/"))
 			throw new IllegalArgumentException(
 					"video name must be a valid url started with \"file:/\"!");
@@ -84,15 +154,22 @@ public class VideoFrameCapture {
 
 			pb.command(cmdList);
 			Process p = pb.start();
-			String output = read(p.getInputStream());
+			String output = readFFMpegOutput(p.getInputStream());
 			if (p.waitFor() != 0) {
-				throw new VideoFrameCaptureException("FFmpeg error:" + output);
+				throw new FFMpegException("FFmpeg error:" + output);
 			}
 		}
 		Image img = new Image(tmp.toURI().toURL().toExternalForm());
 		return img;
 	}
 
+	/**
+	 * Check if "ffmpeg.exe" is loaded. If not, load it to the temporary folder
+	 * instantly.
+	 * 
+	 * @throws IOException
+	 *             if IO error
+	 */
 	public synchronized static void checkLoadFFmpeg() throws IOException {
 		if (ffmpeg == null || !ffmpeg.exists()) {
 			ffmpeg = DataLoader.loadToTemp("ffmpeg.exe");
@@ -100,16 +177,21 @@ public class VideoFrameCapture {
 		}
 	}
 
-	private static String read(InputStream is) {
+	/**
+	 * Read output of FFMpeg
+	 * 
+	 * @param inputStream
+	 *            input stream for reading output of the FFMpeg process
+	 * @return all of the output
+	 */
+	private static String readFFMpegOutput(InputStream inputStream) {
 		BufferedReader br = null;
 		StringBuffer sb = new StringBuffer();
 		boolean firstLine = true;
 		try {
-			br = new BufferedReader(new InputStreamReader(is), 500);
-
+			br = new BufferedReader(new InputStreamReader(inputStream), 500);
 			String line = "";
 			while ((line = br.readLine()) != null) {
-				// System.out.println(line);
 				if (firstLine) {
 					firstLine = false;
 					continue;
@@ -123,24 +205,40 @@ public class VideoFrameCapture {
 			}
 			br.close();
 		} catch (Exception e) {
+			e.printStackTrace();
 		} finally {
 			try {
 				if (br != null)
 					br.close();
 			} catch (Exception e) {
+				e.printStackTrace();
 			}
 		}
 		return sb.toString();
 	}
 
-	public static class VideoFrameCaptureException extends Exception {
+	/**
+	 * Exception for FFMpeg
+	 * 
+	 * @author 宇锴
+	 */
+	public static class FFMpegException extends Exception {
 		private static final long serialVersionUID = -6041667451915158117L;
 
-		public VideoFrameCaptureException() {
+		/**
+		 * Default constructor
+		 */
+		public FFMpegException() {
 			super();
 		}
 
-		public VideoFrameCaptureException(String message) {
+		/**
+		 * Constructor with message
+		 * 
+		 * @param message
+		 *            the detailed message
+		 */
+		public FFMpegException(String message) {
 			super(message);
 		}
 	}

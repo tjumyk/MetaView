@@ -45,9 +45,9 @@ public class PlayerModel {
 						}
 					}
 				}
-				for(Category cat : video.getCategories()){
-					for(Group group :list){
-						if(group.getCategory() == cat)
+				for (Category cat : video.getCategories()) {
+					for (Group group : list) {
+						if (group.getCategory() == cat)
 							relatedGroupsInPlayList.add(group);
 					}
 				}

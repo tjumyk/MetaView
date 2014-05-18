@@ -70,7 +70,7 @@ import org.tjumyk.metaview.Main;
 import org.tjumyk.metaview.cellfactory.ZoomInListFactory;
 import org.tjumyk.metaview.controll.BlockSequencePane;
 import org.tjumyk.metaview.controll.MetaRelationPane;
-import org.tjumyk.metaview.media.VideoFrameCapture;
+import org.tjumyk.metaview.media.VideoFrameFactory;
 import org.tjumyk.metaview.model.Category;
 import org.tjumyk.metaview.model.Group;
 import org.tjumyk.metaview.model.MetaVideo;
@@ -975,7 +975,7 @@ public class BrowserController extends PanelControllerBase {
 			for (Segment segment : video.getSegments()) {
 				int key = segment.getKey();
 				double second = 1.0 * segment.getKey() / video.getFps();
-				Image img = VideoFrameCapture.getCache(video.getMovieFile(),
+				Image img = VideoFrameFactory.getCache(video.getMovieFile(),
 						second, FRMAE_IMAGE_HEIGHT);
 				if (img != null) {
 					frameImageMap.put(key, img);
@@ -996,7 +996,7 @@ public class BrowserController extends PanelControllerBase {
 					if (frameImageMap.containsKey(key))
 						continue;
 					double second = 1.0 * segment.getKey() / video.getFps();
-					Image img = VideoFrameCapture.getFromServer(
+					Image img = VideoFrameFactory.getFromServer(
 							video.getMovieFile(), video.getFrameImageFolder(),
 							second, FRMAE_IMAGE_HEIGHT);
 					if (img != null) {
@@ -1019,7 +1019,7 @@ public class BrowserController extends PanelControllerBase {
 							continue;
 						}
 						double second = 1.0 * segment.getKey() / video.getFps();
-						Image img = VideoFrameCapture.getFromFolder(
+						Image img = VideoFrameFactory.getFromFolder(
 								video.getMovieFile(), folder, second,
 								FRMAE_IMAGE_HEIGHT);
 						if (img != null) {
@@ -1034,7 +1034,7 @@ public class BrowserController extends PanelControllerBase {
 				}
 
 				updateMessage(Main.getString("media.loading_ffmpeg"));
-				VideoFrameCapture.checkLoadFFmpeg();
+				VideoFrameFactory.checkLoadFFmpeg();
 				updateProgress(0, size);
 				updateMessage(Main.getString("media.loading_frame_images"));
 				for (Segment seg : video.getSegments()) {
@@ -1086,7 +1086,7 @@ public class BrowserController extends PanelControllerBase {
 				try {
 					int key = seg.getKey();
 					if (!frameImageMap.containsKey(key)) {
-						Image image = VideoFrameCapture.capture(
+						Image image = VideoFrameFactory.getFromVideo(
 								video.getMovieFile(), second,
 								FRMAE_IMAGE_HEIGHT);
 						frameImageMap.put(key, image);
