@@ -25,24 +25,75 @@ import org.tjumyk.metaview.model.Segment;
 import org.tjumyk.metaview.util.NodeStyleUtil;
 import org.tjumyk.metaview.viewmodel.PlayerModel;
 
+/**
+ * Block view control
+ * 
+ * @author 宇锴
+ */
 public class BlockSequencePane extends GridPane {
+	/**
+	 * Amount of blocks in each row
+	 */
 	private static final int ROW_BLOCKS = 12;
+
+	/**
+	 * Amount of blocks in each column
+	 */
 	private static final int COLUMN_BLOCKS = 25;
+
+	/**
+	 * The amount of all the blocks
+	 */
 	private static final int TOTAL_BLOCKS = ROW_BLOCKS * COLUMN_BLOCKS;
+
+	/**
+	 * A map stores the relation between the model node(Group/Segment) and the
+	 * block nodes
+	 */
 	private Map<Object, List<Node>> nodeListMap = new HashMap<>();
+
+	/**
+	 * A common click handler for click event
+	 */
 	private BlockClickHandler blockClickHandler = new BlockClickHandler();
+
+	/**
+	 * List of all the block nodes.
+	 */
 	private List<Node> blocks = new ArrayList<>();
 
+	/**
+	 * The view-model of the player
+	 */
 	private PlayerModel model;
+
+	/**
+	 * The amount of blocks in each frame
+	 */
 	private double framePerBlock;
 
+	/**
+	 * Default constructor
+	 */
 	public BlockSequencePane() {
 	}
 
+	/**
+	 * Constructor with view-model of the player
+	 * 
+	 * @param model
+	 *            the view-model of the player
+	 */
 	public BlockSequencePane(PlayerModel model) {
 		build(model);
 	}
 
+	/**
+	 * Build the block view using the view-model of the player
+	 * 
+	 * @param model
+	 *            the view-model of the player
+	 */
 	private void build(PlayerModel model) {
 		this.model = model;
 		MetaVideo video = this.model.getVideo();
@@ -122,7 +173,13 @@ public class BlockSequencePane extends GridPane {
 		});
 	}
 
+	/**
+	 * The click handler for common use in block view.
+	 * 
+	 * @author 宇锴
+	 */
 	private class BlockClickHandler implements EventHandler<MouseEvent> {
+		@Override
 		public void handle(MouseEvent event) {
 			if (event.getClickCount() == 2) {
 				Node node = (Node) event.getSource();

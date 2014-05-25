@@ -56,7 +56,7 @@ public class Main extends Application {
 	 * the locale of the running OS.
 	 */
 	private static final ResourceBundle RESOURCE_BUNDLE = ResourceBundle
-			.getBundle("metaview");
+			.getBundle(Main.class.getPackage().getName() + ".i18n.metaview");
 
 	/**
 	 * Get the stage instance

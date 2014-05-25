@@ -24,8 +24,6 @@ public class PlayerModel {
 	private Property<Object> hoverNode = new SimpleObjectProperty<>();
 	private Property<Duration> currentTime = new SimpleObjectProperty<>();
 	private Property<Duration> seekTime = new SimpleObjectProperty<>();
-	private ObservableList<LogicUnit> logicUnitList = FXCollections
-			.observableArrayList();
 	private ObservableList<Group> relatedGroupsInPlayList = FXCollections
 			.observableArrayList();
 
@@ -92,10 +90,6 @@ public class PlayerModel {
 
 	public Property<Duration> getSeekTime() {
 		return seekTime;
-	}
-
-	public ObservableList<LogicUnit> getLogicUnitList() {
-		return logicUnitList;
 	}
 
 	public void applyLogic(LogicUnit unit) {

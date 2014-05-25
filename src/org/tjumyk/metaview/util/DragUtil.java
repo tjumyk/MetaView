@@ -15,9 +15,16 @@ import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.Pane;
 import javafx.scene.shape.Rectangle;
 import javafx.stage.Stage;
+import javafx.stage.StageStyle;
 import javafx.stage.Window;
 import javafx.util.Duration;
 
+/**
+ * Utility class for making nodes or windows with {@link StageStyle#TRANSPARENT}
+ * draggable in JavaFx2+.
+ * 
+ * @author 宇锴
+ */
 public class DragUtil {
 	protected static double initX, initY;
 	protected static double lastX, lastY;
