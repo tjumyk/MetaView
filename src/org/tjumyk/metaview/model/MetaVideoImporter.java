@@ -8,7 +8,7 @@ import java.util.Map;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 
-public class OldMetaImporter {
+public class MetaVideoImporter {
 	private static final int DEFAULT_FPS = 25;
 
 	public static MetaVideo parseOldMeta(File metaFile) throws IOException {

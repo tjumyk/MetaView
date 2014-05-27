@@ -76,7 +76,7 @@ import org.tjumyk.metaview.model.Group;
 import org.tjumyk.metaview.model.MetaVideo;
 import org.tjumyk.metaview.model.MetaVideoParser;
 import org.tjumyk.metaview.model.MetaVideoWriter;
-import org.tjumyk.metaview.model.OldMetaImporter;
+import org.tjumyk.metaview.model.MetaVideoImporter;
 import org.tjumyk.metaview.model.Segment;
 import org.tjumyk.metaview.search.SearchEngine;
 import org.tjumyk.metaview.util.NodeStyleUtil;
@@ -230,7 +230,7 @@ public class BrowserController extends PanelControllerBase {
 
 		if (file != null && file.exists()) {
 			try {
-				MetaVideo video = OldMetaImporter.parseOldMeta(file);
+				MetaVideo video = MetaVideoImporter.parseOldMeta(file);
 				File newFile = new File(FilenameUtils.removeExtension(file
 						.getAbsolutePath()) + ".mvd");
 				MetaVideoWriter.writeToFile(video, newFile);
