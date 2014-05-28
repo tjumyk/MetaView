@@ -28,31 +28,7 @@
 </rowConstraints>
 </GridPane>
         <AnchorPane prefHeight="240.0" prefWidth="380.0" styleClass="dialog_container" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="36.0">
-          <children>
-                <GridPane id="GridPane" layoutX="157.0" layoutY="202.0" prefHeight="42.0" prefWidth="380.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0">
-                  <children>
-<HBox alignment="CENTER_LEFT" spacing="5.0">
-<padding>
-<Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
-</padding>
-</HBox><HBox alignment="CENTER_RIGHT" prefHeight="100.0" prefWidth="200.0" spacing="5.0" GridPane.columnIndex="1">
-<children><Button cancelButton="true" defaultButton="true" mnemonicParsing="false" onAction="#onCloseAction" text="%dialog.close" />
-</children>
-<padding>
-<Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
-</padding></HBox>
-                  </children>
-                  <columnConstraints>
-                    <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" />
-<ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
-                  </columnConstraints>
-                  <rowConstraints>
-                    <RowConstraints minHeight="10.0" vgrow="SOMETIMES" />
-                  </rowConstraints>
-<padding>
-<Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
-</padding>
-                </GridPane><Pagination fx:id="pagination_help_image" layoutX="15.0" layoutY="259.0" pageCount="10" style="-fx-tooltip-visible: false; -fx-page-information-visible: false;" styleClass="bullet" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" VBox.vgrow="NEVER" />
+          <children><Pagination fx:id="pagination_help_image" layoutX="15.0" layoutY="259.0" pageCount="10" style="-fx-tooltip-visible: false; -fx-page-information-visible: false;" styleClass="bullet" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" VBox.vgrow="NEVER" /><Button cancelButton="true" defaultButton="true" layoutX="447.0" layoutY="310.0" mnemonicParsing="false" onAction="#onCloseAction" text="%dialog.close" AnchorPane.bottomAnchor="10.0" AnchorPane.rightAnchor="10.0" />
           </children>
         </AnchorPane>
       </children>
