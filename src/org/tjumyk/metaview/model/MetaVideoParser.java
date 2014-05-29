@@ -12,6 +12,12 @@ import org.tjumyk.metaview.util.XMLParser;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
+/**
+ * Parser for parsing meta-video description files into {@link MetaVideo} model
+ * objects.
+ * 
+ * @author 宇锴
+ */
 public class MetaVideoParser {
 	public static MetaVideo parse(File file) throws Exception {
 		InputStream xmlStream = new FileInputStream(file);

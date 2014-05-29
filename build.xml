@@ -102,7 +102,15 @@
 		</fx:signjar>
 	</target>
 
-	<target name="deploy" depends="sign-jars">
+	<target name="deploy-image" depends="sign-jars">
+		<fx:deploy verbose="true" width="${applet.width}" height="${applet.height}" outdir="dist" outfile="${application.title}" offlineAllowed="true" nativeBundles="image">
+			<fx:info title="${application.title}" vendor="${application.vendor}" description="${application.description}" />
+			<fx:application refid="app" />
+			<fx:resources refid="appRes" />
+		</fx:deploy>
+	</target>
+
+	<target name="deploy-windows-installer" depends="sign-jars">
 		<fx:deploy verbose="true" width="${applet.width}" height="${applet.height}" outdir="dist" outfile="${application.title}" offlineAllowed="true" nativeBundles="exe">
 			<fx:info title="${application.title}" vendor="${application.vendor}" description="${application.description}" />
 			<fx:application refid="app" />

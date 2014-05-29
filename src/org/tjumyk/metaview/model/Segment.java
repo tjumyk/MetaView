@@ -1,5 +1,10 @@
 package org.tjumyk.metaview.model;
 
+/**
+ * The model class of the segments.
+ * 
+ * @author 宇锴
+ */
 public class Segment {
 	private int key, from, to, index;
 

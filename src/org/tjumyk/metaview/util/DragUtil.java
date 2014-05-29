@@ -154,6 +154,12 @@ public class DragUtil {
 		});
 	}
 
+	/**
+	 * Set the window with {@link StageStyle#TRANSPARENT} draggable.
+	 * 
+	 * @param stage
+	 *            the window
+	 */
 	public static void setDraggable(final Window stage) {
 		stage.sceneProperty().addListener(new ChangeListener<Scene>() {
 			@Override

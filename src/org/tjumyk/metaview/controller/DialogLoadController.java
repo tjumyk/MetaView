@@ -16,6 +16,12 @@ import javafx.scene.control.TextArea;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
 
+/**
+ * Controller of the "Loading" dialog.
+ * 
+ * @author 宇锴
+ *
+ */
 public class DialogLoadController extends DialogControllerBase {
 
 	@FXML
@@ -82,6 +88,9 @@ public class DialogLoadController extends DialogControllerBase {
 			super.closeDialog(root);
 	}
 
+	/**
+	 * Show the detailed information.
+	 */
 	private void showDetail() {
 		root.getScene().getWindow().setHeight(300);
 		area_detail.setVisible(true);

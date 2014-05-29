@@ -3,6 +3,11 @@ package org.tjumyk.metaview.model;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * The model class of the categories.
+ * 
+ * @author 宇锴
+ */
 public class Category {
 	private String name, info;
 

@@ -10,7 +10,23 @@ import javafx.scene.shape.Line;
 import org.tjumyk.metaview.model.Segment;
 import org.tjumyk.metaview.viewmodel.PlayerModel;
 
+/**
+ * Utility class for changing the node styles based on the view-model
+ * 
+ * @author 宇锴
+ */
 public class NodeStyleUtil {
+	/**
+	 * Bind the styles of the nodes in the relation view. It's also compatible
+	 * to the category list view or segment list view in the meta pane.
+	 * 
+	 * @param model
+	 *            view-model object
+	 * @param nodeMap
+	 *            map from model object to UI node
+	 * @param lineMap
+	 *            map from model object to the list of lines
+	 */
 	public static void bindStyle(PlayerModel model, Map<Object, Node> nodeMap,
 			Map<Object, List<Line>> lineMap) {
 		model.getActiveNode().addListener((b, o, n) -> {
@@ -64,17 +80,16 @@ public class NodeStyleUtil {
 				for (Line line : lineMap.get(o))
 					line.getStyleClass().remove(className);
 		}
-		// if (o instanceof Group) {
-		// Group group = (Group) o;
-		// for (Segment seg : group.getSegments()) {
-		// if (add)
-		// nodeMap.get(seg).getStyleClass().add(className);
-		// else
-		// nodeMap.get(seg).getStyleClass().remove(className);
-		// }
-		// }
 	}
 
+	/**
+	 * Bind styles of the nodes in the block view.
+	 * 
+	 * @param model
+	 *            view-model object
+	 * @param nodeListMap
+	 *            the map from model node to the related node list
+	 */
 	public static void bindBlockListStyle(PlayerModel model,
 			Map<Object, List<Node>> nodeListMap) {
 		model.getActiveNode().addListener((b, o, n) -> {
@@ -112,6 +127,15 @@ public class NodeStyleUtil {
 				});
 	}
 
+	/**
+	 * Bind the styles of the nodes in the cateogry list view or group list view
+	 * in the meta pane.
+	 * 
+	 * @param model
+	 *            view-model
+	 * @param nodeMap
+	 *            map from model node to the UI node
+	 */
 	public static void bindStyle(PlayerModel model, Map<Object, Node> nodeMap) {
 		bindStyle(model, nodeMap, null);
 	}

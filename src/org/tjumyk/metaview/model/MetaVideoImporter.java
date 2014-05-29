@@ -8,6 +8,11 @@ import java.util.Map;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 
+/**
+ * The importer for importing meta-video files from other meta-video systems.
+ * 
+ * @author 宇锴
+ */
 public class MetaVideoImporter {
 	private static final int DEFAULT_FPS = 25;
 

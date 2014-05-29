@@ -15,6 +15,11 @@ import org.tjumyk.metaview.model.Group;
 import org.tjumyk.metaview.model.MetaVideo;
 import org.tjumyk.metaview.model.Segment;
 
+/**
+ * The view-model class for the player
+ * 
+ * @author 宇锴
+ */
 public class PlayerModel {
 	private MetaVideo video;
 	private ObservableList<Segment> segmentPlayList = FXCollections

@@ -7,6 +7,11 @@ import javafx.scene.Node;
 import javafx.scene.input.MouseEvent;
 import javafx.stage.Window;
 
+/**
+ * Utility class for resizing windows.
+ * 
+ * @author 宇锴
+ */
 public class ResizeUtil {
 	private static double drag_x, drag_y, init_x, init_y;
 

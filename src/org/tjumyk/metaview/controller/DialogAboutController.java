@@ -14,6 +14,11 @@ import javafx.scene.layout.Pane;
 
 import org.tjumyk.metaview.Main;
 
+/**
+ * Controller of the "About" dialog.
+ * 
+ * @author 宇锴
+ */
 public class DialogAboutController extends DialogControllerBase {
 
 	@FXML

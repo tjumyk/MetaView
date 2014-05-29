@@ -1,5 +1,11 @@
 package org.tjumyk.metaview.viewmodel;
 
+/**
+ * A logical unit containing the logic action type and the action object.
+ * 
+ * @author 宇锴
+ *
+ */
 public class LogicUnit {
 	private Object object;
 	private LogicAction action;

@@ -21,6 +21,11 @@ import javafx.stage.Stage;
 import org.tjumyk.metaview.Main;
 import org.tjumyk.metaview.util.ResizeUtil;
 
+/**
+ * The controller of the window frame.
+ * 
+ * @author 宇锴
+ */
 public class FrameController implements Initializable {
 
 	@FXML
@@ -32,6 +37,9 @@ public class FrameController implements Initializable {
 	@FXML
 	Pane resize_handler;
 
+	/**
+	 * The controller of the main content panel.
+	 */
 	private PanelControllerBase panelController;
 
 	@FXML
@@ -68,6 +76,9 @@ public class FrameController implements Initializable {
 		}
 	}
 
+	/**
+	 * Toggle the window size to the maximum or restore to the default size.
+	 */
 	private void toggleWindowMaxOrRestore() {
 		ObservableList<String> classes = root.getStyleClass();
 		if (classes.contains("max")) {
@@ -77,8 +88,15 @@ public class FrameController implements Initializable {
 		}
 	}
 
-	private void selectNav(Node sourceNode) throws IOException {
-		String sourceID = sourceNode.getId();
+	/**
+	 * Select the node in the navigator panel. It executes the command related
+	 * to this node.
+	 * 
+	 * @param navNode
+	 *            the node in the navigator panel
+	 */
+	private void selectNav(Node navNode) {
+		String sourceID = navNode.getId();
 		panelController.execCommand(sourceID.substring(4));
 	}
 

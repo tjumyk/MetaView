@@ -3,6 +3,11 @@ package org.tjumyk.metaview.model;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * The model class of the meta-video.
+ * 
+ * @author 宇锴
+ */
 public class MetaVideo {
 	private String version, name, movieFile, frameImageFolder;
 	private int totalFrames, fps;

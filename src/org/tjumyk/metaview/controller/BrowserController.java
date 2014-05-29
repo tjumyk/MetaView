@@ -74,9 +74,9 @@ import org.tjumyk.metaview.media.VideoFrameFactory;
 import org.tjumyk.metaview.model.Category;
 import org.tjumyk.metaview.model.Group;
 import org.tjumyk.metaview.model.MetaVideo;
+import org.tjumyk.metaview.model.MetaVideoImporter;
 import org.tjumyk.metaview.model.MetaVideoParser;
 import org.tjumyk.metaview.model.MetaVideoWriter;
-import org.tjumyk.metaview.model.MetaVideoImporter;
 import org.tjumyk.metaview.model.Segment;
 import org.tjumyk.metaview.search.SearchEngine;
 import org.tjumyk.metaview.util.NodeStyleUtil;
@@ -84,10 +84,25 @@ import org.tjumyk.metaview.viewmodel.LogicAction;
 import org.tjumyk.metaview.viewmodel.LogicUnit;
 import org.tjumyk.metaview.viewmodel.PlayerModel;
 
+/**
+ * Controller of the main content panel
+ * 
+ * @author 宇锴
+ */
 public class BrowserController extends PanelControllerBase {
 
+	/**
+	 * Image height of the frame images
+	 */
 	private static final int FRMAE_IMAGE_HEIGHT = 80;
-	private static final int FRMAE_TITLE_WIDTH = 100, FRMAE_TITLE_HEIGHT = 36;
+	/**
+	 * width of the titles of the frame images
+	 */
+	private static final int FRMAE_TITLE_WIDTH = 100;
+	/**
+	 * height of the titles of the frame images
+	 */
+	private static final int FRMAE_TITLE_HEIGHT = 36;
 
 	@FXML
 	AnchorPane root;
@@ -125,10 +140,26 @@ public class BrowserController extends PanelControllerBase {
 	@FXML
 	HBox box_search_results;
 
+	/**
+	 * Model object of the meta-video
+	 */
 	private MetaVideo video;
+
+	/**
+	 * MediaPlayer for playing video content
+	 */
 	private MediaPlayer player;
+
+	/**
+	 * The context menu for quick tasks
+	 */
 	private ContextMenu metaBoxContextMenu;
-	private Map<Integer, Image> frameImageMap = new HashMap<>();
+
+	/**
+	 * The map for storing the {@link Segment} images, key is the key frame
+	 * number of the {@link Segment}, value is the loaded image
+	 */
+	private Map<Integer, Image> segmentImageMap = new HashMap<>();
 
 	private PlayerTimeListener playerTimeListener = new PlayerTimeListener();
 	private GroupSelectListener groupSelectListener = new GroupSelectListener();
@@ -136,21 +167,49 @@ public class BrowserController extends PanelControllerBase {
 	private NodeMouseEnterListener nodeMouseEnterListener = new NodeMouseEnterListener();
 	private NodeMouseExitListener nodeMouseExitListener = new NodeMouseExitListener();
 	private SearchItemClickHandler searchItemClickHandler = new SearchItemClickHandler();
-
 	private ZoomInListFactory zoomInListCellFactory = new ZoomInListFactory();
+
+	/**
+	 * The JavaScript code to be injected in the WebView
+	 */
 	private String injectJS;
+
+	/**
+	 * The connector/bridge object for the "JavaScript to Java" communication
+	 */
 	private JSConnector connector = new JSConnector();
 
-	private PlayerModel model;
-	private Map<Object, Node> nodeMap = new HashMap<>();
-	private Group showSegmentsGroup;
 	/**
-	 * 用于操作视频的控件组的淡入/淡出动画
+	 * The view-model of this player
+	 */
+	private PlayerModel model;
+
+	/**
+	 * The map stores the relationship between the model node to the UI node.
+	 */
+	private Map<Object, Node> nodeMap = new HashMap<>();
+
+	/**
+	 * The {@link Group} node which is showing its inner {@link Segment}s in the
+	 * segment list view
+	 */
+	private Group showSegmentsGroup;
+
+	/**
+	 * The animation of showing/hiding the controls in the media player window
 	 */
 	private FadeTransition controlTransition;
 
+	/**
+	 * Self instance
+	 */
 	private static BrowserController instance;
 
+	/**
+	 * Get the instance of this controller
+	 * 
+	 * @return
+	 */
 	public static BrowserController getInstance() {
 		return instance;
 	}
@@ -159,13 +218,19 @@ public class BrowserController extends PanelControllerBase {
 	public void initialize(URL location, ResourceBundle resources) {
 		instance = this;
 		initKeyBinding();
-		initUI();
+		initUIBinding();
+		initWebView();
 		initDragIn();
+		initContextMenu();
+		list_zoom_in.setCellFactory(zoomInListCellFactory);
 		Platform.runLater(() -> {
 			parseParam();
 		});
 	}
 
+	/**
+	 * Initialize the handler for handling the drag-in files.
+	 */
 	private void initDragIn() {
 		root.addEventHandler(
 				DragEvent.ANY,
@@ -184,7 +249,7 @@ public class BrowserController extends PanelControllerBase {
 							List<?> fileList = (List<?>) db
 									.getContent(DataFormat.FILES);
 							if (fileList.size() > 0) {
-								openNewFile((File) fileList.get(0));
+								loadFile((File) fileList.get(0));
 								success = true;
 							}
 						}
@@ -205,7 +270,7 @@ public class BrowserController extends PanelControllerBase {
 				showSearchBar();
 				break;
 			case "import":
-				importOldMeta();
+				importOtherMeta();
 				break;
 			case "help":
 				Main.openDialog("dialog_help.fxml", null);
@@ -223,7 +288,13 @@ public class BrowserController extends PanelControllerBase {
 		}
 	}
 
-	private void importOldMeta() {
+	/**
+	 * Import other meta-video files.
+	 * <p>
+	 * Currently, only the old ViMeta-VU config files are supported.
+	 * </p>
+	 */
+	private void importOtherMeta() {
 		FileChooser chooser = new FileChooser();
 		chooser.setTitle(Main.getString("filechooser.import_old_metavideo"));
 		File file = chooser.showOpenDialog(Main.getStage());
@@ -236,7 +307,7 @@ public class BrowserController extends PanelControllerBase {
 				MetaVideoWriter.writeToFile(video, newFile);
 				this.video = video;
 				initSearch();
-				loadFrameImages();
+				loadAll();
 			} catch (Exception e) {
 				Dialogs.create().title(Main.getString("error.title"))
 						.masthead(Main.getString("error.transform_error"))
@@ -246,6 +317,9 @@ public class BrowserController extends PanelControllerBase {
 		}
 	}
 
+	/**
+	 * Show the search bar (with animation).
+	 */
 	private void showSearchBar() {
 		if (box_search.isVisible())
 			return;
@@ -257,6 +331,9 @@ public class BrowserController extends PanelControllerBase {
 		box_search.setVisible(true);
 	}
 
+	/**
+	 * Hide the search bar (with animation).
+	 */
 	private void hideSearchBar() {
 		if (!box_search.isVisible())
 			return;
@@ -271,10 +348,18 @@ public class BrowserController extends PanelControllerBase {
 		tt.play();
 	}
 
-	public Map<Integer, Image> getFrameImageMap() {
-		return frameImageMap;
+	/**
+	 * Get the {@link Segment}-image map.
+	 * 
+	 * @return
+	 */
+	public Map<Integer, Image> getSegmentImageMap() {
+		return segmentImageMap;
 	}
 
+	/**
+	 * Initialize the key bindings for special tasks.
+	 */
 	private void initKeyBinding() {
 		root.addEventHandler(KeyEvent.KEY_PRESSED, event -> {
 			KeyCode keyCode = event.getCode();
@@ -307,6 +392,9 @@ public class BrowserController extends PanelControllerBase {
 		});
 	}
 
+	/**
+	 * Initialize the media player.
+	 */
 	private void initPlayer() {
 		model.getSeekTime().addListener((b, o, n) -> {
 			if (player == null) {
@@ -342,14 +430,17 @@ public class BrowserController extends PanelControllerBase {
 				});
 	}
 
-	private void initUI() {
+	/**
+	 * Initialize the bindings in UI controls.
+	 */
+	private void initUIBinding() {
 		accordion_category_list.expandedPaneProperty().addListener(
 				(observable, oldValue, newValue) -> {
 					if (newValue == null)
-						showWebViewInfo(null);
+						showHyperText(null);
 					else {
 						Category cat = (Category) newValue.getUserData();
-						showWebViewInfo(cat.getInfo());
+						showHyperText(cat.getInfo());
 					}
 
 				});
@@ -360,33 +451,6 @@ public class BrowserController extends PanelControllerBase {
 		};
 		stack_media_view.widthProperty().addListener(stack_size_listener);
 		stack_media_view.heightProperty().addListener(stack_size_listener);
-
-		media_view.addEventHandler(MouseEvent.MOUSE_CLICKED, e -> {
-			if (e.getClickCount() == 2) {
-				toggleVideoFullScreen();
-			}
-		});
-		metaBoxContextMenu = buildContextMenu();
-
-		WebEngine engine = webview_info.getEngine();
-		engine.setUserStyleSheetLocation(Main.class.getResource(
-				"css/webview.css").toExternalForm());
-		engine.getLoadWorker().stateProperty()
-				.addListener(new ChangeListener<State>() {
-					@Override
-					public void changed(
-							ObservableValue<? extends State> observable,
-							State oldValue, State newValue) {
-						if (newValue == State.SUCCEEDED) {
-							JSObject win = (JSObject) engine
-									.executeScript("window");
-							win.setMember("fx", connector);
-							engine.executeScript(injectJS);
-						}
-					}
-				});
-
-		list_zoom_in.setCellFactory(zoomInListCellFactory);
 
 		Platform.runLater(() -> {
 			root.getScene().getWindow().focusedProperty()
@@ -426,14 +490,43 @@ public class BrowserController extends PanelControllerBase {
 
 	}
 
-	private void execSearch(String query) {
+	/**
+	 * Initialize the WebView.
+	 */
+	private void initWebView() {
+		WebEngine engine = webview_info.getEngine();
+		engine.setUserStyleSheetLocation(Main.class.getResource(
+				"css/webview.css").toExternalForm());
+		engine.getLoadWorker().stateProperty()
+				.addListener(new ChangeListener<State>() {
+					@Override
+					public void changed(
+							ObservableValue<? extends State> observable,
+							State oldValue, State newValue) {
+						if (newValue == State.SUCCEEDED) {
+							JSObject win = (JSObject) engine
+									.executeScript("window");
+							win.setMember("fx", connector);
+							engine.executeScript(injectJS);
+						}
+					}
+				});
+	}
+
+	/**
+	 * Execute search with the given keyword.
+	 * 
+	 * @param key
+	 *            search keyword
+	 */
+	private void execSearch(String key) {
 		try {
 			box_search_results.getChildren().clear();
-			List<Group> groups = SearchEngine.searchModel(model.getVideo(),
-					query);
+			List<Group> groups = SearchEngine
+					.searchModel(model.getVideo(), key);
 			for (Group item : groups) {
-				ImageView img = new ImageView(BrowserController.getInstance()
-						.getFrameImageMap().get(item.getKey()));
+				ImageView img = new ImageView(
+						segmentImageMap.get(item.getKey()));
 				img.setFitWidth(56);
 				img.setPreserveRatio(true);
 				Label label_name = new Label(item.getName());
@@ -455,14 +548,23 @@ public class BrowserController extends PanelControllerBase {
 		}
 	}
 
-	private void showWebViewInfo(String info) {
-		if (info == null)
+	/**
+	 * Safely show the hyper-text content in the WebView.
+	 * 
+	 * @param text
+	 *            hyper-text content
+	 */
+	private void showHyperText(String text) {
+		if (text == null)
 			webview_info.getEngine().loadContent("");
 		else
-			webview_info.getEngine().loadContent(info);
+			webview_info.getEngine().loadContent(text);
 	}
 
-	private ContextMenu buildContextMenu() {
+	/**
+	 * Initialize the context menu for quick tasks.
+	 */
+	private void initContextMenu() {
 		MenuItem itemSelectPlay = new MenuItem(
 				Main.getString("metabox.select_and_play"), new ImageView(
 						Main.getImage("play.png", 24, 24)));
@@ -495,23 +597,29 @@ public class BrowserController extends PanelControllerBase {
 					LogicAction.SUBTRACT));
 		});
 
-		return cm;
+		this.metaBoxContextMenu = cm;
 	}
 
-	private void toggleVideoFullScreen() {
-		// TODO show video in full screen
-	}
-
+	/**
+	 * Parse the parameters from command line or other sources.
+	 * <p>
+	 * If exist, the first parameter is regarded as the path of the meta-video
+	 * file, and then open that file.
+	 * </p>
+	 */
 	private void parseParam() {
 		List<String> params = Main.getParams().getUnnamed();
 		if (params.size() > 0) {
 			String param = params.get(0);
 			if (param.length() > 0) {
-				openNewFile(new File(param));
+				loadFile(new File(param));
 			}
 		}
 	}
 
+	/**
+	 * Show a file chooser for opening a new meta-video file.
+	 */
 	private void openNewFile() {
 		FileChooser chooser = new FileChooser();
 		chooser.setTitle(Main.getString("filechooser.choose_metavideo"));
@@ -519,15 +627,25 @@ public class BrowserController extends PanelControllerBase {
 				new ExtensionFilter("MetaVideo Description File", "*.mvd"));
 		File file = chooser.showOpenDialog(Main.getStage());
 
-		openNewFile(file);
+		loadFile(file);
 	}
 
-	private void openNewFile(File file) {
+	/**
+	 * Load the meta-video file.
+	 * <p>
+	 * First, parse the file into the {@link MetaVideo} model object, if
+	 * succeeded, then load all the components.
+	 * </p>
+	 * 
+	 * @param file
+	 *            meta-video file
+	 */
+	private void loadFile(File file) {
 		if (file != null && file.exists()) {
 			try {
 				video = MetaVideoParser.parse(file);
 				initSearch();
-				loadFrameImages();
+				loadAll();
 			} catch (Exception e) {
 				Dialogs.create().title(Main.getString("error.title"))
 						.masthead(Main.getString("error.parse_error"))
@@ -537,6 +655,11 @@ public class BrowserController extends PanelControllerBase {
 		}
 	}
 
+	/**
+	 * Initialize search engine
+	 * 
+	 * @throws IOException
+	 */
 	private void initSearch() throws IOException {
 		Task<Void> initTask = new Task<Void>() {
 
@@ -558,14 +681,23 @@ public class BrowserController extends PanelControllerBase {
 		new Thread(initTask).start();
 	}
 
-	private void loadFrameImages() {
-		frameImageMap.clear();
+	/**
+	 * Load all the components.
+	 */
+	private void loadAll() {
+		segmentImageMap.clear();
 		if (video == null)
 			return;
 
-		Task<Void> loadTask = new LoadFrameImageTask();
+		Task<Void> loadTask = new LoadSegmentImageTask();
 		loadTask.setOnSucceeded((e) -> {
-			loadVideoUI();
+			model = new PlayerModel(video);
+			loadMetaPane();
+			loadPlayer();
+			bindActiveNode();
+			loadCharts();
+			buildInjectJS();
+			txt_search_key.setText("");
 		});
 		try {
 			Main.openDialog("dialog_load.fxml", loadTask);
@@ -575,8 +707,7 @@ public class BrowserController extends PanelControllerBase {
 		}
 	}
 
-	private void loadVideoUI() {
-		model = new PlayerModel(video);
+	private void loadMetaPane() {
 		accordion_category_list.getPanes().clear();
 		flow_shot_list.getChildren().clear();
 		nodeMap.clear();
@@ -588,7 +719,7 @@ public class BrowserController extends PanelControllerBase {
 			box.getStyleClass().addAll("box", "segment");
 			box.setPadding(new Insets(3));
 			box.setAlignment(Pos.CENTER);
-			ImageView img = new ImageView(frameImageMap.get(seg.getKey()));
+			ImageView img = new ImageView(segmentImageMap.get(seg.getKey()));
 			img.setFitHeight(FRMAE_IMAGE_HEIGHT * 0.7);
 			img.setPreserveRatio(true);
 			Label label = new Label("Segment " + seg.getIndex());
@@ -617,7 +748,8 @@ public class BrowserController extends PanelControllerBase {
 				box.setPadding(new Insets(3));
 				box.setAlignment(Pos.CENTER);
 				Tooltip.install(box, new Tooltip(group.getName()));
-				ImageView img = new ImageView(frameImageMap.get(group.getKey()));
+				ImageView img = new ImageView(segmentImageMap.get(group
+						.getKey()));
 				img.setPreserveRatio(true);
 				Label label = new Label(group.getName());
 				label.getStyleClass().add("name");
@@ -648,19 +780,27 @@ public class BrowserController extends PanelControllerBase {
 			}
 			firstPane = false;
 		}
-
-		if (player != null) {
-			player.stop();
-		}
-		Media media = new Media(video.getMovieFile());
-		player = new MediaPlayer(media);
-		player.currentTimeProperty().addListener(playerTimeListener);
-		model.getCurrentTime().bind(player.currentTimeProperty());
-		media_view.setMediaPlayer(player);
-
-		initPlayer();
-
 		NodeStyleUtil.bindStyle(model, nodeMap);
+	}
+
+	/**
+	 * Load the chart views. It includes relation view, zoom-In view and block
+	 * view.
+	 */
+	private void loadCharts() {
+		MetaRelationPane relPane = new MetaRelationPane(model);
+		pane_relation.setContent(relPane);
+		BlockSequencePane blockPane = new BlockSequencePane(model);
+		pane_block.setContent(blockPane);
+
+		Bindings.bindContent(list_zoom_in.getItems(),
+				model.getRelatedGroupsInPlayList());
+	}
+
+	/**
+	 * Make binding on the active node
+	 */
+	private void bindActiveNode() {
 		model.getActiveNode().addListener(
 				(b, o, n) -> {
 					if (n == null)
@@ -689,20 +829,27 @@ public class BrowserController extends PanelControllerBase {
 						showGroupSegments((Group) n);
 					}
 				});
-
-		MetaRelationPane relPane = new MetaRelationPane(model);
-		pane_relation.setContent(relPane);
-		BlockSequencePane blockPane = new BlockSequencePane(model);
-		pane_block.setContent(blockPane);
-
-		Bindings.bindContent(list_zoom_in.getItems(),
-				model.getRelatedGroupsInPlayList());
-
-		buildInjectJS();
-
-		txt_search_key.setText("");
 	}
 
+	/**
+	 * Load media player
+	 */
+	private void loadPlayer() {
+		if (player != null) {
+			player.stop();
+		}
+		Media media = new Media(video.getMovieFile());
+		player = new MediaPlayer(media);
+		player.currentTimeProperty().addListener(playerTimeListener);
+		model.getCurrentTime().bind(player.currentTimeProperty());
+		media_view.setMediaPlayer(player);
+
+		initPlayer();
+	}
+
+	/**
+	 * Build the JavaScript to be injected in the WebView.
+	 */
 	private void buildInjectJS() {
 		StringBuilder sb = new StringBuilder("var groups=[");
 		boolean isFirst = true;
@@ -732,7 +879,22 @@ public class BrowserController extends PanelControllerBase {
 		injectJS = sb.toString();
 	}
 
+	/**
+	 * Connector/Bridge class for "JavaScript to Java" communication.
+	 * 
+	 * @author 宇锴
+	 *
+	 */
 	public class JSConnector {
+		/**
+		 * Set the {@link Group} with the given name and given key frame number
+		 * as the active node in the view-model.
+		 * 
+		 * @param name
+		 *            group name
+		 * @param key
+		 *            key frame number
+		 */
 		public void selectGroup(String name, int key) {
 			for (Category cat : model.getVideo().getCategories()) {
 				for (Group group : cat.getGroups()) {
@@ -753,6 +915,11 @@ public class BrowserController extends PanelControllerBase {
 		}
 	}
 
+	/**
+	 * Listener for tracking the current time of the media player.
+	 * 
+	 * @author 宇锴
+	 */
 	private class PlayerTimeListener implements ChangeListener<Duration> {
 		@Override
 		public void changed(ObservableValue<? extends Duration> observable,
@@ -780,11 +947,18 @@ public class BrowserController extends PanelControllerBase {
 		}
 	}
 
+	/**
+	 * Show the {@link Segment}s in the given {@link Group} in the group list
+	 * view.
+	 * 
+	 * @param group
+	 *            {@link Group} node
+	 */
 	private void showGroupSegments(Group group) {
 		if (group == showSegmentsGroup)
 			return;
 		showSegmentsGroup = group;
-		showWebViewInfo(group.getInfo());
+		showHyperText(group.getInfo());
 		flow_shot_list.getChildren().clear();
 		for (Segment seg : group.getSegments()) {
 			flow_shot_list.getChildren().add(nodeMap.get(seg));
@@ -848,6 +1022,12 @@ public class BrowserController extends PanelControllerBase {
 		hideSearchBar();
 	}
 
+	/**
+	 * Set the {@link Segment} as the play-list and play it.
+	 * 
+	 * @param seg
+	 *            {@link Segment} node
+	 */
 	private void selectAndPlay(Segment seg) {
 		model.getSegmentPlayList().clear();
 		model.getPlayingSegment().setValue(null);
@@ -855,6 +1035,12 @@ public class BrowserController extends PanelControllerBase {
 		model.getPlayingSegment().setValue(seg);
 	}
 
+	/**
+	 * Set {@link Segment}s in the {@link Group} as the play-list and play them.
+	 * 
+	 * @param group
+	 *            {@link Group} node
+	 */
 	private void selectAndPlay(Group group) {
 		model.getSegmentPlayList().clear();
 		model.getPlayingSegment().setValue(null);
@@ -865,6 +1051,11 @@ public class BrowserController extends PanelControllerBase {
 		}
 	}
 
+	/**
+	 * Listener for the mouse enter event.
+	 * 
+	 * @author 宇锴
+	 */
 	private class NodeMouseEnterListener implements EventHandler<MouseEvent> {
 		@Override
 		public void handle(MouseEvent event) {
@@ -873,6 +1064,11 @@ public class BrowserController extends PanelControllerBase {
 		}
 	}
 
+	/**
+	 * Listener for the mouse exit event.
+	 * 
+	 * @author 宇锴
+	 */
 	private class NodeMouseExitListener implements EventHandler<MouseEvent> {
 		@Override
 		public void handle(MouseEvent event) {
@@ -882,6 +1078,11 @@ public class BrowserController extends PanelControllerBase {
 		}
 	}
 
+	/**
+	 * Handler for clicking the items in the search result pane.
+	 * 
+	 * @author 宇锴
+	 */
 	public class SearchItemClickHandler implements EventHandler<MouseEvent> {
 		@Override
 		public void handle(MouseEvent event) {
@@ -901,6 +1102,11 @@ public class BrowserController extends PanelControllerBase {
 		}
 	}
 
+	/**
+	 * Listener for the mouse click event on the {@link Group} nodes.
+	 * 
+	 * @author 宇锴
+	 */
 	private class GroupSelectListener implements EventHandler<MouseEvent> {
 		@Override
 		public void handle(MouseEvent event) {
@@ -930,6 +1136,11 @@ public class BrowserController extends PanelControllerBase {
 
 	}
 
+	/**
+	 * Listener for the mouse click event on the {@link Segment} nodes.
+	 * 
+	 * @author 宇锴
+	 */
 	private class SegmentSelectListener implements EventHandler<MouseEvent> {
 		@Override
 		public void handle(MouseEvent event) {
@@ -959,7 +1170,13 @@ public class BrowserController extends PanelControllerBase {
 
 	}
 
-	private class LoadFrameImageTask extends Task<Void> {
+	/**
+	 * The task of loading key frame images of the segments in the current
+	 * meta-video model.
+	 * 
+	 * @author 宇锴
+	 */
+	private class LoadSegmentImageTask extends Task<Void> {
 
 		Exception exception;
 
@@ -978,7 +1195,7 @@ public class BrowserController extends PanelControllerBase {
 				Image img = VideoFrameFactory.getCache(video.getMovieFile(),
 						second, FRMAE_IMAGE_HEIGHT);
 				if (img != null) {
-					frameImageMap.put(key, img);
+					segmentImageMap.put(key, img);
 					Thread.sleep(20);
 					cachedCount++;
 				}
@@ -993,14 +1210,14 @@ public class BrowserController extends PanelControllerBase {
 				int count = 0;
 				for (Segment segment : video.getSegments()) {
 					int key = segment.getKey();
-					if (frameImageMap.containsKey(key))
+					if (segmentImageMap.containsKey(key))
 						continue;
 					double second = 1.0 * segment.getKey() / video.getFps();
 					Image img = VideoFrameFactory.getFromServer(
 							video.getMovieFile(), video.getFrameImageFolder(),
 							second, FRMAE_IMAGE_HEIGHT);
 					if (img != null) {
-						frameImageMap.put(key, img);
+						segmentImageMap.put(key, img);
 					}
 					count++;
 					updateProgress(count, size);
@@ -1014,7 +1231,7 @@ public class BrowserController extends PanelControllerBase {
 					int loaded = 0;
 					for (Segment segment : video.getSegments()) {
 						int key = segment.getKey();
-						if (frameImageMap.containsKey(key)) {
+						if (segmentImageMap.containsKey(key)) {
 							loaded++;
 							continue;
 						}
@@ -1023,7 +1240,7 @@ public class BrowserController extends PanelControllerBase {
 								video.getMovieFile(), folder, second,
 								FRMAE_IMAGE_HEIGHT);
 						if (img != null) {
-							frameImageMap.put(key, img);
+							segmentImageMap.put(key, img);
 							Thread.sleep(20);
 							loaded++;
 						}
@@ -1058,6 +1275,9 @@ public class BrowserController extends PanelControllerBase {
 			return null;
 		}
 
+		/**
+		 * Update the progress of the loading task.
+		 */
 		private synchronized void updateLoadProgress() {
 			Platform.runLater(new Runnable() {
 
@@ -1068,6 +1288,13 @@ public class BrowserController extends PanelControllerBase {
 			});
 		}
 
+		/**
+		 * The sub task of the {@link LoadSegmentImageTask}, it loads only one
+		 * image according to the given parameters. It's designed for
+		 * multi-thread acceleration in the fix-size thread pool。
+		 * 
+		 * @author 宇锴
+		 */
 		private class SubTaskRunnable implements Runnable {
 			double second;
 			Segment seg;
@@ -1085,11 +1312,11 @@ public class BrowserController extends PanelControllerBase {
 			public void run() {
 				try {
 					int key = seg.getKey();
-					if (!frameImageMap.containsKey(key)) {
+					if (!segmentImageMap.containsKey(key)) {
 						Image image = VideoFrameFactory.getFromVideo(
 								video.getMovieFile(), second,
 								FRMAE_IMAGE_HEIGHT);
-						frameImageMap.put(key, image);
+						segmentImageMap.put(key, image);
 					}
 					updateLoadProgress();
 				} catch (InterruptedException e) {

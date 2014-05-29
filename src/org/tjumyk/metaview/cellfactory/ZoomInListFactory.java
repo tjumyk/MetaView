@@ -62,7 +62,7 @@ public class ZoomInListFactory implements
 				grid.getColumnConstraints().addAll(cc1, cc2);
 
 				ImageView img = new ImageView(BrowserController.getInstance()
-						.getFrameImageMap().get(item.getKey()));
+						.getSegmentImageMap().get(item.getKey()));
 				img.setFitWidth(80);
 				img.setPreserveRatio(true);
 				Label label_name = new Label("[" + item.getCategory().getName()

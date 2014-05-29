@@ -3,6 +3,11 @@ package org.tjumyk.metaview.model;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * The model class of the groups.
+ * 
+ * @author 宇锴
+ */
 public class Group {
 	private String name, info;
 	private int key;

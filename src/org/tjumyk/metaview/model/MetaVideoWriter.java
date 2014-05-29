@@ -20,6 +20,12 @@ import javax.xml.transform.stream.StreamResult;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
+/**
+ * Tool for exporting the meta-video model object into the meta-video
+ * description file.
+ * 
+ * @author 宇锴
+ */
 public class MetaVideoWriter {
 	public static void writeToFile(MetaVideo video, File file)
 			throws ParserConfigurationException, MalformedURLException {

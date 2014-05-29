@@ -15,6 +15,11 @@ import javafx.scene.image.ImageView;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
 
+/**
+ * Controller of the "Help" dialog.
+ * 
+ * @author 宇锴
+ */
 public class DialogHelpController extends DialogControllerBase {
 	@FXML
 	private AnchorPane root;
@@ -22,8 +27,19 @@ public class DialogHelpController extends DialogControllerBase {
 	@FXML
 	private Pagination pagination_help_image;
 
+	/**
+	 * Parent folder of the help images
+	 */
 	private static final String IMAGE_PATH = "help-images/";
+
+	/**
+	 * Total count of the help images
+	 */
 	private static final int IMAGE_TOTAL = 5;
+
+	/**
+	 * All the loaded ImageView list
+	 */
 	private List<ImageView> imgList = new ArrayList<>();
 
 	@Override
