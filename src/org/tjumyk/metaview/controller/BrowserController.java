@@ -208,7 +208,7 @@ public class BrowserController extends PanelControllerBase {
 	/**
 	 * Get the instance of this controller
 	 * 
-	 * @return
+	 * @return instance of this class
 	 */
 	public static BrowserController getInstance() {
 		return instance;
@@ -351,7 +351,7 @@ public class BrowserController extends PanelControllerBase {
 	/**
 	 * Get the {@link Segment}-image map.
 	 * 
-	 * @return
+	 * @return the map
 	 */
 	public Map<Integer, Image> getSegmentImageMap() {
 		return segmentImageMap;
@@ -658,7 +658,7 @@ public class BrowserController extends PanelControllerBase {
 	/**
 	 * Initialize search engine
 	 * 
-	 * @throws IOException
+	 * @throws IOException if IO error
 	 */
 	private void initSearch() throws IOException {
 		Task<Void> initTask = new Task<Void>() {

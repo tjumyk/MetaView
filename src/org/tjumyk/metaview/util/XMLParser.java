@@ -160,12 +160,12 @@ public class XMLParser {
 
 	/**
 	 * Under the given parent node, find ALL the direct child nodes with the
-	 * given tag names.
+	 * given tag name.
 	 * 
 	 * @param element
 	 *            parent element
-	 * @param names
-	 *            tag names
+	 * @param name
+	 *            tag name
 	 * @return element object
 	 */
 	public static List<Element> getDirectChildElementsByName(Element element,
