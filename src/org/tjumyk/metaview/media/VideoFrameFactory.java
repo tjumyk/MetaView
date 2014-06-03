@@ -5,6 +5,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -128,7 +129,7 @@ public class VideoFrameFactory {
 		if (!video.startsWith("file:/"))
 			throw new IllegalArgumentException(
 					"video name must be a valid url started with \"file:/\"!");
-		String videoPath = video.substring(6);
+		String videoPath = URLDecoder.decode(video.substring(6),"utf-8");
 		File dir = new File(Main.TEMP_DIR);
 		if (!dir.exists())
 			dir.mkdirs();
@@ -144,7 +145,7 @@ public class VideoFrameFactory {
 			cmdList.add("-ss");
 			cmdList.add(Double.toString(second));
 			cmdList.add("-i");
-			cmdList.add(videoPath);
+			cmdList.add("\""+videoPath+"\"");
 			cmdList.add("-y");
 			cmdList.add("-vframes");
 			cmdList.add("1");

@@ -1,17 +1,15 @@
 package org.tjumyk.metaview.model;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.PrintWriter;
-import java.net.MalformedURLException;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.OutputKeys;
 import javax.xml.transform.Transformer;
-import javax.xml.transform.TransformerConfigurationException;
 import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
@@ -28,7 +26,8 @@ import org.w3c.dom.Element;
  */
 public class MetaVideoWriter {
 	public static void writeToFile(MetaVideo video, File file)
-			throws ParserConfigurationException, MalformedURLException {
+			throws IOException, ParserConfigurationException,
+			TransformerException {
 		DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
 		DocumentBuilder builder = factory.newDocumentBuilder();
 		Document document = builder.newDocument();
@@ -95,27 +94,18 @@ public class MetaVideoWriter {
 		saveXML(document, file);
 	}
 
-	private static void saveXML(Document document, File file) {
+	private static void saveXML(Document document, File file)
+			throws IOException, TransformerException {
 		TransformerFactory tf = TransformerFactory.newInstance();
-		try {
-			Transformer transformer = tf.newTransformer();
-			DOMSource source = new DOMSource(document);
-			transformer.setOutputProperty(OutputKeys.ENCODING, "utf-8");
-			transformer.setOutputProperty(OutputKeys.VERSION, "1.0");
-			transformer.setOutputProperty(OutputKeys.DOCTYPE_SYSTEM,
-					"MetaVideo.dtd");
-			transformer.setOutputProperty(OutputKeys.INDENT, "yes");
-			PrintWriter pw = new PrintWriter(new FileOutputStream(file));
-			StreamResult result = new StreamResult(pw);
-			transformer.transform(source, result);
-		} catch (TransformerConfigurationException e) {
-			System.out.println(e.getMessage());
-		} catch (IllegalArgumentException e) {
-			System.out.println(e.getMessage());
-		} catch (FileNotFoundException e) {
-			System.out.println(e.getMessage());
-		} catch (TransformerException e) {
-			System.out.println(e.getMessage());
-		}
+		Transformer transformer = tf.newTransformer();
+		DOMSource source = new DOMSource(document);
+		transformer.setOutputProperty(OutputKeys.ENCODING, "utf-8");
+		transformer.setOutputProperty(OutputKeys.VERSION, "1.0");
+		transformer.setOutputProperty(OutputKeys.DOCTYPE_SYSTEM,
+				"MetaVideo.dtd");
+		transformer.setOutputProperty(OutputKeys.INDENT, "yes");
+		PrintWriter pw = new PrintWriter(new FileOutputStream(file));
+		StreamResult result = new StreamResult(pw);
+		transformer.transform(source, result);
 	}
 }

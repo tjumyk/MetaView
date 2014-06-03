@@ -16,6 +16,12 @@
 		<fileset dir="." includes="lib/*.jar" />
 		<fileset dir="dist" includes="${application.title}.jar" />
 	</fx:resources>
+	
+	<fx:resources id="deployRes">
+		<fileset dir="." includes="lib/*.jar" />
+        <fileset dir="dist" includes="${application.title}.jar" />
+        <fileset dir="." includes="sample/" />
+    </fx:resources>
 
 	<target name="check">
 		<condition property="delbin">
@@ -106,7 +112,7 @@
 		<fx:deploy verbose="true" width="${applet.width}" height="${applet.height}" outdir="dist" outfile="${application.title}" offlineAllowed="true" nativeBundles="image">
 			<fx:info title="${application.title}" vendor="${application.vendor}" description="${application.description}" />
 			<fx:application refid="app" />
-			<fx:resources refid="appRes" />
+			<fx:resources refid="deployRes" />
 		</fx:deploy>
 	</target>
 
@@ -114,7 +120,7 @@
 		<fx:deploy verbose="true" width="${applet.width}" height="${applet.height}" outdir="dist" outfile="${application.title}" offlineAllowed="true" nativeBundles="exe">
 			<fx:info title="${application.title}" vendor="${application.vendor}" description="${application.description}" />
 			<fx:application refid="app" />
-			<fx:resources refid="appRes" />
+			<fx:resources refid="deployRes" />
 		</fx:deploy>
 	</target>
 
