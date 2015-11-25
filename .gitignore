@@ -2,3 +2,5 @@
 /sample
 /dist
 /doc
+*.iml
+/.idea/
